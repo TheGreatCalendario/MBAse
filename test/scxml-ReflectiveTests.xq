@@ -43,6 +43,7 @@ declare variable $mbaHolton := $mbaDocument/mba:mba;
 
 (: Check if refined model is behavior consistent to original model. expected result: true)
    This test is here because it is a precondition for the following tests regarding reflective functions 
+   sccIsBehaviorConsistentSpecialization is used as the default behavior function - see API description
 return scc:isBehaviorConsistentSpecialization($scxmlRentalOriginal, $scxmlRentalRefined) :)
 
 declare variable $subState := 
@@ -52,20 +53,23 @@ declare variable $subState :=
 declare variable $originalState :=  $mbaHolton//sc:state[@id='Running'];
 
 
-(: Check if non-updating version of refine state function works.
-Using an MBA that is loaded from file system makes it easier to be sure it has no descendants. expected result: refined state node  
+(: Check if non-updating version of refine state function works. 
+Using an MBA that is loaded from file system makes it easier to be sure it has no descendants. expected result: refined state node  :) 
 let $subState := 
   <sc:state id="RunningGood">   
   </sc:state>
 
-return reflection:getRefinedState($originalState, $subState)    :)
 
-(: Chif if a final node can also be inserted using the refine state function. expected result: refined state node 
+let $defaultBehavior := scc:isBehaviorConsistentSpecialization#2  
+return reflection:getRefinedState($originalState, $subState, $defaultBehavior)    
+
+(: Chif if a final node can also be inserted using the refine state function. expected result: refined state node
 let $finalState := 
   <sc:final id="TheEnd">   
   </sc:final>
-  
-return reflection:getRefinedState($originalState, $finalState)  :)
+
+let $defaultBehavior := scc:isBehaviorConsistentSpecialization#2  
+return reflection:getRefinedState($originalState, $finalState, $defaultBehavior)  :)
 
 
 (: Check if updating version of refine state function works. Backup is necessary before executing this test.   
@@ -77,22 +81,23 @@ declare variable $subStateAustriaFromDB :=
 
 (: Step 1: execute updating function
    Step 2: return variable :)  
-(:reflection:refineState($originalStateAustriaFromDB, $subStateAustriaFromDB):)
+(:reflection:refineStateDefaultBehavior($originalStateAustriaFromDB, $subStateAustriaFromDB):)
 (: $mbaAustriaFromDB :)
 
   
 (: Check if refineState fails if an MBA has already descendants: expected: error 
 For this purpose MBA is loaded from database  
 declare variable $originalStateFromDB :=  $mbaHoltonFromDB//sc:state[@id='Running'];
-reflection:refineState($originalStateFromDB, $subState) :)
+
+reflection:refineStateDefaultBehavior($originalStateFromDB, $subState) :)
 
 
-(: Check if extending with parallel region works. expected: parallel node  :)
+(: Check if extending with parallel region works. expected: parallel node  
 let $originalState :=  $mbaHolton//sc:state[@id='Restructuring']
 let $parallelState := <sc:state id="Renovating"></sc:state>
 
 let $defaultBehavior := scc:isBehaviorConsistentSpecialization#2
-return reflection:getParallelRegionExtension($originalState, $parallelState, $defaultBehavior, ()) 
+return reflection:getParallelRegionExtension($originalState, $parallelState, $defaultBehavior, ()) :)
 
 
 (: Check if extending with parallel region fails because MBA has ancestors: expected: error  

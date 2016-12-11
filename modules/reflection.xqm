@@ -36,7 +36,7 @@ declare updating function reflection:setActive($mba  as element(),
 };
 
 
-declare function reflection:getRefinedState($state as element(), $subState as element()) as element()* {
+declare function reflection:getRefinedState($state as element(), $subState as element(), $evalFunction as item()) as element()* {
   let $mba := $state/ancestor::mba:mba
 
     return if (not(mba:getDescendants($mba))) then (
@@ -47,7 +47,7 @@ declare function reflection:getRefinedState($state as element(), $subState as el
         return insert node $subState into $stateCopy
       ) return $c
 
-      return if (scc:isBehaviorConsistentSpecialization($originalScxml, $refinedScxml)) then (
+      return if ($evalFunction($originalScxml, $refinedScxml)) then (
           $refinedScxml//sc:state[@id=$state/@id/data()]
       ) else (
             error(QName('http://www.dke.jku.at/MBA/err',
@@ -61,8 +61,14 @@ declare function reflection:getRefinedState($state as element(), $subState as el
     )
 };
 
-declare updating function reflection:refineState($state as element(), $subState as element()) {
-    let $refinedState := reflection:getRefinedState($state, $subState)
+declare updating function reflection:refineStateDefaultBehavior($state as element(), $subState as element()) {
+    let $defaultBehaviorFunction := scc:isBehaviorConsistentSpecialization#2
+    let $refinedState := reflection:getRefinedState($state, $subState, $defaultBehaviorFunction)
+    return replace node $state with $refinedState
+};
+
+declare updating function reflection:refineStateCustomBehavior($state as element(), $subState as element(), $evalFunction as item()) {
+    let $refinedState := reflection:getRefinedState($state, $subState, $evalFunction)
     return replace node $state with $refinedState
 };
 
