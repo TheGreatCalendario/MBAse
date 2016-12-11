@@ -177,7 +177,7 @@ declare updating function reflection:refineEvent($transition as element(), $even
     return replace node $transition with $refinedTransition
 };
 
-declare function reflection:getTransitionWithRefinedTarget($transition as element(), $target as xs:string) as element()* {
+declare function reflection:getTransitionWithRefinedTarget($transition as element(), $target as xs:string, $evalFunction as item()) as element()* {
     let $mba := $transition/ancestor::mba:mba
 
     return if (not(mba:getDescendants($mba))) then (
@@ -192,7 +192,7 @@ declare function reflection:getTransitionWithRefinedTarget($transition as elemen
             return replace node $transitionCopy with functx:add-or-update-attributes($transitionCopy, fn:QName('', 'target'), ($target))
         ) return $c
 
-        return if (scc:isBehaviorConsistentSpecialization($originalScxml, $refinedScxml)) then (
+        return if ($evalFunction($originalScxml, $refinedScxml)) then (
             $refinedScxml//sc:state[@id = $transitionSourceState/@id]//sc:transition[$indexOfTransition]
         ) else (
             error(QName('http://www.dke.jku.at/MBA/err',
@@ -207,14 +207,19 @@ declare function reflection:getTransitionWithRefinedTarget($transition as elemen
 
 };
 
-declare updating function reflection:refineTransitionTarget($transition as element(), $target as xs:string) {
-    let  $refinedTransition := reflection:getTransitionWithRefinedTarget($transition, $target)
+declare updating function reflection:refineTransitionTargetDefaultBehavior($transition as element(), $target as xs:string) {
+    let $defaultBehaviorFunction := scc:isBehaviorConsistentSpecialization#2
+    let $refinedTransition := reflection:getTransitionWithRefinedTarget($transition, $target, $defaultBehaviorFunction)
+    return replace node $transition with $refinedTransition
+};
+
+declare updating function reflection:refineTransitionTargetCustomerBehavior($transition as element(), $target as xs:string, $evalFunction as item()) {
+    let $refinedTransition := reflection:getTransitionWithRefinedTarget($transition, $target, $evalFunction)
     return replace node $transition with $refinedTransition
 };
 
 
-
-declare function reflection:getTransitionWithRefinedSourceCustomBehavior($transition as element(), $source as xs:string, $evalFunction as item()) as element()* {
+declare function reflection:getTransitionWithRefinedSource($transition as element(), $source as xs:string, $evalFunction as item()) as element()* {
     let $mba := $transition/ancestor::mba:mba
 
     return if (not(mba:getDescendants($mba))) then (
@@ -247,11 +252,11 @@ declare function reflection:getTransitionWithRefinedSourceCustomBehavior($transi
 
 declare updating function reflection:refineTransitionSourceDefaultBehavior($transition as element(), $source as xs:string) {
     let $defaultBehaviorFunction := scc:isBehaviorConsistentSpecialization#2
-    let  $refinedTransitionStateNode := reflection:getTransitionWithRefinedSourceCustomBehavior($transition, $source, $defaultBehaviorFunction)
+    let $refinedTransitionStateNode := reflection:getTransitionWithRefinedSource($transition, $source, $defaultBehaviorFunction)
     return replace node sc:getSourceState($transition) with $refinedTransitionStateNode
 };
 
 declare updating function reflection:refineTransitionSourceCustomBehavior($transition as element(), $target as xs:string,  $evalFunction as item()) {
-    let  $refinedTransition := reflection:getTransitionWithRefinedSourceCustomBehavior($transition, $target, $evalFunction)
+    let $refinedTransition := reflection:getTransitionWithRefinedSource($transition, $target, $evalFunction)
     return replace node $transition with $refinedTransition
 };
