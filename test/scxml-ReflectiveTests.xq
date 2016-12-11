@@ -87,25 +87,28 @@ declare variable $originalStateFromDB :=  $mbaHoltonFromDB//sc:state[@id='Runnin
 reflection:refineState($originalStateFromDB, $subState) :)
 
 
-(: Check if extending with parallel region works. expected: parallel node  
+(: Check if extending with parallel region works. expected: parallel node  :)
 let $originalState :=  $mbaHolton//sc:state[@id='Restructuring']
 let $parallelState := <sc:state id="Renovating"></sc:state>
 
-return reflection:getParallelRegionExtension($originalState, $parallelState, ()) :)
+let $defaultBehavior := scc:isBehaviorConsistentSpecialization#2
+return reflection:getParallelRegionExtension($originalState, $parallelState, $defaultBehavior, ()) 
 
 
 (: Check if extending with parallel region fails because MBA has ancestors: expected: error  
 let $originalState := $mbaHoltonFromDB//sc:state[@id='Restructuring']
 let $parallelState :=  <sc:state id="Renovating"></sc:state>
 
-return reflection:getParallelRegionExtension($originalState, $parallelState, ()) :)
+let $defaultBehavior := scc:isBehaviorConsistentSpecialization#2
+return reflection:getParallelRegionExtension($originalState, $parallelState, $defaultBehavior, ()) :)
 
 (: Check if extending with parallel region works if an optionalNode is specified: expected: parallel node 
 let $originalState :=  $mbaHolton//sc:state[@id='Restructuring']
 let $parallelState := <sc:state id="Renovating"></sc:state>
 let $optionalState := <sc:transition event="someOtherEvent" target="Renovating"/>
 
-return reflection:getParallelRegionExtension($originalState, $parallelState, $optionalState) :)
+let $defaultBehavior := scc:isBehaviorConsistentSpecialization#2
+return reflection:getParallelRegionExtension($originalState, $parallelState, $defaultBehavior, $optionalState) :)
 
 (: Check if extending with parallel region that has multiple nodes in parameter parallelState works. expected parallel node 
 let $originalState :=  $mbaHolton//sc:state[@id='Restructuring']
@@ -113,16 +116,17 @@ let $parallelState := <sc:state id="Renovating"></sc:state>
 let $parallelState2 := <sc:state id="Evacuating"/>
 let $parallelStates := ($parallelState, $parallelState2)
 
-return reflection:getParallelRegionExtension($originalState, $parallelStates, ()) :)
+let $defaultBehavior := scc:isBehaviorConsistentSpecialization#2
+return reflection:getParallelRegionExtension($originalState, $parallelStates, $defaultBehavior, ()) :)
 
 
-(: Check if refining condition of transition with no current condition works. expected: refined transition  :)
+(: Check if refining condition of transition with no current condition works. expected: refined transition  
 let $originalState :=  $mbaHolton//sc:state[@id='Restructuring']
 let $transition := $originalState//sc:transition[2]
 let $condition := "New Condition"
 
 let $defaultBehavior := scc:isBehaviorConsistentSpecialization#2
-return reflection:getTransitionWithRefinedPreCondition($transition, $condition, $defaultBehavior) 
+return reflection:getTransitionWithRefinedPreCondition($transition, $condition, $defaultBehavior) :)
 
 
 (: Check if refining condition of transition with already existing condition works. expected: refined transition 

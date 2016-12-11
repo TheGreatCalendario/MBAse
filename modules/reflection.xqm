@@ -67,7 +67,7 @@ declare updating function reflection:refineState($state as element(), $subState 
 };
 
 
-declare function reflection:getParallelRegionExtension($state as element(), $parallelState as element()+, $optionalNodes as element()?) as element()* {
+declare function reflection:getParallelRegionExtension($state as element(), $parallelState as element()+, $evalFunction as item(), $optionalNodes as element()?) as element()* {
     let $mba := $state/ancestor::mba:mba
 
     return if (not(mba:getDescendants($mba))) then (
@@ -84,7 +84,7 @@ declare function reflection:getParallelRegionExtension($state as element(), $par
 
         ) return $c
 
-        return if (scc:isBehaviorConsistentSpecialization($originalScxml, $refinedScxml)) then (
+        return if ($evalFunction($originalScxml, $refinedScxml)) then (
             $refinedScxml//sc:state[@id=$state/@id/data()]/..
         ) else (
             error(QName('http://www.dke.jku.at/MBA/err',
@@ -98,8 +98,14 @@ declare function reflection:getParallelRegionExtension($state as element(), $par
     )
 };
 
-declare updating function reflection:extendWithParallelRegion($state as element(), $parallelState as element(), $optionalNodes as element()?) {
-    let $parallelRegionNode := reflection:getParallelRegionExtension($state, $parallelState, $optionalNodes)
+declare updating function reflection:extendWithParallelRegionDefaultBehavior($state as element(), $parallelState as element(), $optionalNodes as element()?) {
+    let $defaultBehaviorFunction := scc:isBehaviorConsistentSpecialization#2
+    let $parallelRegionNode := reflection:getParallelRegionExtension($state, $parallelState, $defaultBehaviorFunction, $optionalNodes)
+    return replace node $state with $parallelRegionNode
+};
+
+declare updating function reflection:extendWithParallelRegionCustomBehavior($state as element(), $parallelState as element(), $evalFunction as item(), $optionalNodes as element()?) {
+    let $parallelRegionNode := reflection:getParallelRegionExtension($state, $parallelState, $evalFunction, $optionalNodes)
     return replace node $state with $parallelRegionNode
 };
 
