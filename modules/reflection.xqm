@@ -212,7 +212,9 @@ declare updating function reflection:refineTransitionTarget($transition as eleme
     return replace node $transition with $refinedTransition
 };
 
-declare function reflection:getTransitionWithRefinedSource($transition as element(), $source as xs:string) as element()* {
+
+
+declare function reflection:getTransitionWithRefinedSourceCustomBehavior($transition as element(), $source as xs:string, $evalFunction as item()) as element()* {
     let $mba := $transition/ancestor::mba:mba
 
     return if (not(mba:getDescendants($mba))) then (
@@ -226,10 +228,10 @@ declare function reflection:getTransitionWithRefinedSource($transition as elemen
             let $transitionCopy := $stateCopy//sc:transition[$indexOfTransition]
 
             return (insert node $transitionCopy into $newSourceState,
-                    delete node $transitionCopy)
+            delete node $transitionCopy)
         ) return $c
 
-        return if (scc:isBehaviorConsistentSpecialization($originalScxml, $refinedScxml)) then (
+        return if ($evalFunction($originalScxml, $refinedScxml)) then (
             $refinedScxml//sc:state[@id = $transitionSourceState/@id]
         ) else (
             error(QName('http://www.dke.jku.at/MBA/err',
@@ -243,7 +245,13 @@ declare function reflection:getTransitionWithRefinedSource($transition as elemen
     )
 };
 
-declare updating function reflection:refineTransitionSource($transition as element(), $source as xs:string) {
-    let  $refinedTransitionStateNode := reflection:getTransitionWithRefinedTarget($transition, $source)
+declare updating function reflection:refineTransitionSourceDefaultBehavior($transition as element(), $source as xs:string) {
+    let $defaultBehaviorFunction := scc:isBehaviorConsistentSpecialization#2
+    let  $refinedTransitionStateNode := reflection:getTransitionWithRefinedSourceCustomBehavior($transition, $source, $defaultBehaviorFunction)
     return replace node sc:getSourceState($transition) with $refinedTransitionStateNode
+};
+
+declare updating function reflection:refineTransitionSourceCustomBehavior($transition as element(), $target as xs:string,  $evalFunction as item()) {
+    let  $refinedTransition := reflection:getTransitionWithRefinedSourceCustomBehavior($transition, $target, $evalFunction)
+    return replace node $transition with $refinedTransition
 };

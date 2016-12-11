@@ -364,7 +364,7 @@ let $newTarget := "RefinedRestructuring"
 
 return reflection:getTransitionWithRefinedTarget($transition, $newTarget)  :)
 
-(: Check if refining source of transition works. expected: refined transition 
+(: Check if refining source of transition works. expected: refined transition :)
 let $inlineMBA := <mba xmlns="http://www.dke.jku.at/MBA" xmlns:sync="http://www.dke.jku.at/MBA/Synchronization" xmlns:sc="http://www.w3.org/2005/07/scxml" name="HoltonHotelChain" hierarchy="parallel" topLevel="business" isDefault="true">
     <levels>
       <level name="business"> 
@@ -396,9 +396,10 @@ let $originalState :=  $inlineMBA//sc:state[@id='Restructuring']
 let $transition := $originalState//sc:transition[2]
 let $source := "RefinedRestructuring"
 
-return reflection:getTransitionWithRefinedSource($transition, $source)  :)
+let $defaultBehavior := scc:isBehaviorConsistentSpecialization#2
+return reflection:getTransitionWithRefinedSourceCustomBehavior($transition, $source, $defaultBehavior)  
 
-(: Check if refining source of transition works. expected: error :)
+(: Check if refining source of transition works. expected: error 
 let $inlineMBA := <mba xmlns="http://www.dke.jku.at/MBA" xmlns:sync="http://www.dke.jku.at/MBA/Synchronization" xmlns:sc="http://www.w3.org/2005/07/scxml" name="HoltonHotelChain" hierarchy="parallel" topLevel="business" isDefault="true">
     <levels>
       <level name="business"> 
@@ -430,4 +431,5 @@ let $originalState :=  $inlineMBA//sc:state[@id='Restructuring']
 let $transition := $originalState//sc:transition[2]
 let $source := "Running"
 
-return reflection:getTransitionWithRefinedSource($transition, $source)  
+let $defaultBehavior := scc:isBehaviorConsistentSpecialization#2
+return reflection:getTransitionWithRefinedSourceCustomBehavior($transition, $source, $defaultBehavior)    :)
