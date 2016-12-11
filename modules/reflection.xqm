@@ -143,7 +143,7 @@ declare updating function reflection:refinePreCondition($transition as element()
     return replace node $transition with $refinedTransition
 };
 
-declare function reflection:getTransitionWithRefinendEvents($transition as element(), $event as xs:string) as element()* {
+declare function reflection:getTransitionWithRefinendEvents($transition as element(), $event as xs:string, $evalFunction as item()) as element()* {
     let $mba := $transition/ancestor::mba:mba
 
     return if (not(mba:getDescendants($mba))) then (
@@ -158,7 +158,7 @@ declare function reflection:getTransitionWithRefinendEvents($transition as eleme
             return replace node $transitionCopy with functx:add-or-update-attributes($transitionCopy, fn:QName('', 'event'), ($event))
         ) return $c
 
-        return if (scc:isBehaviorConsistentSpecialization($originalScxml, $refinedScxml)) then (
+        return if ($evalFunction($originalScxml, $refinedScxml)) then (
             $refinedScxml//sc:state[@id = $transitionSourceState/@id]//sc:transition[$indexOfTransition]
         ) else (
             error(QName('http://www.dke.jku.at/MBA/err',
@@ -172,8 +172,14 @@ declare function reflection:getTransitionWithRefinendEvents($transition as eleme
     )
 };
 
-declare updating function reflection:refineEvent($transition as element(), $event as xs:string) {
-    let  $refinedTransition := reflection:getTransitionWithRefinendEvents($transition, $event)
+declare updating function reflection:refineEventDefaultBehavior($transition as element(), $event as xs:string) {
+    let $defaultBehaviorFunction := scc:isBehaviorConsistentSpecialization#2
+    let  $refinedTransition := reflection:getTransitionWithRefinendEvents($transition, $event, $defaultBehaviorFunction)
+    return replace node $transition with $refinedTransition
+};
+
+declare updating function reflection:refineEventCustomBehavior($transition as element(), $event as xs:string, $evalFunction as item()) {
+    let  $refinedTransition := reflection:getTransitionWithRefinendEvents($transition, $event, $evalFunction)
     return replace node $transition with $refinedTransition
 };
 
