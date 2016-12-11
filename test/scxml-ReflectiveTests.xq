@@ -116,12 +116,13 @@ let $parallelStates := ($parallelState, $parallelState2)
 return reflection:getParallelRegionExtension($originalState, $parallelStates, ()) :)
 
 
-(: Check if refining condition of transition with no current condition works. expected: refined transition  
+(: Check if refining condition of transition with no current condition works. expected: refined transition  :)
 let $originalState :=  $mbaHolton//sc:state[@id='Restructuring']
 let $transition := $originalState//sc:transition[2]
 let $condition := "New Condition"
 
-return reflection:getTransitionWithRefinedPreCondition($transition, $condition) :)
+let $defaultBehavior := scc:isBehaviorConsistentSpecialization#2
+return reflection:getTransitionWithRefinedPreCondition($transition, $condition, $defaultBehavior) 
 
 
 (: Check if refining condition of transition with already existing condition works. expected: refined transition 
@@ -155,9 +156,10 @@ let $originalState :=  $inlineMBA//sc:state[@id='Restructuring']
 let $transition := $originalState//sc:transition[2]
 let $condition := "New Condition"
 
-return reflection:getTransitionWithRefinedPreCondition($transition, $condition) :)
+let $defaultBehavior := scc:isBehaviorConsistentSpecialization#2
+return reflection:getTransitionWithRefinedPreCondition($transition, $condition, $defaultBehavior) :)
 
-(: Check if refining event of transition with no current event works. expected: refined transition :)
+(: Check if refining event of transition with no current event works. expected: refined transition 
 let $inlineMBA := <mba xmlns="http://www.dke.jku.at/MBA" xmlns:sync="http://www.dke.jku.at/MBA/Synchronization" xmlns:sc="http://www.w3.org/2005/07/scxml" name="HoltonHotelChain" hierarchy="parallel" topLevel="business" isDefault="true">
     <levels>
       <level name="business"> 
@@ -190,7 +192,7 @@ let $transition := $originalState//sc:transition[2]
 let $event := "NewEvent"
 
 let $defaultBehavior := scc:isBehaviorConsistentSpecialization#2
-return reflection:getTransitionWithRefinendEvents($transition, $event, $defaultBehavior) 
+return reflection:getTransitionWithRefinendEvents($transition, $event, $defaultBehavior) :)
 
 (: Check if refining event of transition with already existing event works. expected: refined transition 
 let $inlineMBA := <mba xmlns="http://www.dke.jku.at/MBA" xmlns:sync="http://www.dke.jku.at/MBA/Synchronization" xmlns:sc="http://www.w3.org/2005/07/scxml" name="HoltonHotelChain" hierarchy="parallel" topLevel="business" isDefault="true">

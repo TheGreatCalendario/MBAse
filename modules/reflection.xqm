@@ -103,7 +103,7 @@ declare updating function reflection:extendWithParallelRegion($state as element(
     return replace node $state with $parallelRegionNode
 };
 
-declare function reflection:getTransitionWithRefinedPreCondition($transition as element(), $condition as xs:string) as element()* {
+declare function reflection:getTransitionWithRefinedPreCondition($transition as element(), $condition as xs:string, $evalFunction as item()) as element()* {
     let $mba := $transition/ancestor::mba:mba
 
     return if (not(mba:getDescendants($mba))) then (
@@ -124,7 +124,7 @@ declare function reflection:getTransitionWithRefinedPreCondition($transition as 
             )
         ) return $c
 
-        return if (scc:isBehaviorConsistentSpecialization($originalScxml, $refinedScxml)) then (
+        return if ($evalFunction($originalScxml, $refinedScxml)) then (
             $refinedScxml//sc:state[@id = $transitionSourceState/@id]//sc:transition[$indexOfTransition]
         ) else (
             error(QName('http://www.dke.jku.at/MBA/err',
@@ -138,8 +138,14 @@ declare function reflection:getTransitionWithRefinedPreCondition($transition as 
     )
 };
 
-declare updating function reflection:refinePreCondition($transition as element(), $condition as xs:string) {
-    let  $refinedTransition := reflection:getTransitionWithRefinedPreCondition($transition, $condition)
+declare updating function reflection:refinePreConditionDefaultBehavior($transition as element(), $condition as xs:string) {
+    let $defaultBehaviorFunction := scc:isBehaviorConsistentSpecialization#2
+    let  $refinedTransition := reflection:getTransitionWithRefinedPreCondition($transition, $condition, $defaultBehaviorFunction)
+    return replace node $transition with $refinedTransition
+};
+
+declare updating function reflection:refinePreConditionCustomBehavior($transition as element(), $condition as xs:string, $evalFunction as item()) {
+    let  $refinedTransition := reflection:getTransitionWithRefinedPreCondition($transition, $condition, $evalFunction)
     return replace node $transition with $refinedTransition
 };
 
