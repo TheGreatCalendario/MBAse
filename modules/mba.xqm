@@ -78,11 +78,11 @@ declare updating function mba:createMBAse($newDb as xs:string) {
         xsi:schemaLocation="http://www.dke.jku.at/MBA {$dbDimSchemaFileName}"/>
 
     let $mbaSchemaSimple :=
-        <xs:schema xmlns="http://www.dke.jku.at/MBA"
-        xmlns:mba="http://www.dke.jku.at/MBA"
+        <xs:schema xmlns="http://www.dke.jku.at/MBA/Simple"
+        xmlns:mba="http://www.dke.jku.at/MBA/Simple"
         xmlns:sc="http://www.w3.org/2005/07/scxml"
         xmlns:xs="http://www.w3.org/2001/XMLSchema"
-        targetNamespace="http://www.dke.jku.at/MBA"
+        targetNamespace="http://www.dke.jku.at/MBA/Simple"
         elementFormDefault="qualified"
         attributeFormDefault="unqualified">
             <xs:element name="mba">
@@ -107,11 +107,11 @@ declare updating function mba:createMBAse($newDb as xs:string) {
     let $mbaSchemaFileNameSimple := 'xsd/mba_simple.xsd'
 
     let $mbaSchemaParallel :=
-        <xs:schema xmlns="http://www.dke.jku.at/MBA"
-        xmlns:mba="http://www.dke.jku.at/MBA"
+        <xs:schema xmlns="http://www.dke.jku.at/MBA/Parallel"
+        xmlns:mba="http://www.dke.jku.at/MBA/Parallel"
         xmlns:sc="http://www.w3.org/2005/07/scxml"
         xmlns:xs="http://www.w3.org/2001/XMLSchema"
-        targetNamespace="http://www.dke.jku.at/MBA"
+        targetNamespace="http://www.dke.jku.at/MBA/Parallel"
         elementFormDefault="qualified"
         attributeFormDefault="unqualified">
             <xs:element name="mba">
