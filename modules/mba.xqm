@@ -268,7 +268,7 @@ declare function mba:concretizeParallelAccumulator($parents as element()*, $name
 
         (: make concretization :)
         let $parentLevel :=
-            if ($numberOfParents = 1 or mba:checkIfSCXMLIdenticalForLevel($parents[1], $parents[2], $topLevel)) then (
+            if ($numberOfParents = 1 or mba:checkIfSCXMLIdenticalForMBAListAtLevel($parents[1], $parents, $topLevel)) then (
                 functx:remove-elements(
                         functx:first-node(
                                 mba:getLevel($parents[1], $topLevel)
@@ -286,7 +286,7 @@ declare function mba:concretizeParallelAccumulator($parents as element()*, $name
         (: return subLevels and check if they are identical in case of 2 parents :)
         let $subLevels :=
             for $x in $subLevelNames
-            return if ($numberOfParents = 1 or mba:checkIfSCXMLIdenticalForLevel($parents[1], $parents[2], $x)) then (
+            return if ($numberOfParents = 1 or mba:checkIfSCXMLIdenticalForMBAListAtLevel($parents[1], $parents, $x)) then (
                 mba:getLevel($parents[1], $x)
             ) else (
                 error(QName('http://www.dke.jku.at/MBA/err',
@@ -362,11 +362,15 @@ declare function mba:checkIfSCXMLIdentical($scxml1 as element(), $scxml2 as elem
     fn:deep-equal($scxml1, $scxml2)
 };
 
-declare function mba:checkIfSCXMLIdenticalForLevel($mba1 as element(), $mba2 as element(), $level as xs:string) as xs:boolean {
+declare function mba:checkIfSCXMLIdenticalForMBAPairAtLevel($mba1 as element(), $mba2 as element(), $level as xs:string) as xs:boolean {
     let $scxml1 := mba:getSCXMLAtLevel($mba1, $level)
     let $scxml2 := mba:getSCXMLAtLevel($mba2, $level)
 
     return mba:checkIfSCXMLIdentical($scxml1, $scxml2)
+};
+
+declare function mba:checkIfSCXMLIdenticalForMBAListAtLevel($referenceMba as element(), $mbaList as element()*, $level as xs:string) as xs:boolean {
+    every $mbaElem in $mbaList satisfies (mba:checkIfSCXMLIdenticalForMBAPairAtLevel($referenceMba, $mbaElem, $level))
 };
 
 declare function mba:getLevel($mba as element(), $level as xs:string) as element()* {
