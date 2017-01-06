@@ -422,6 +422,11 @@ declare function mba:getMBA($db as xs:string,
     return $mba
 };
 
+declare function mba:getCollectionNames($db as xs:string) {
+    let $collections := db:open($db, 'collections.xml')/mba:collections/mba:collection
+    return $collections/@name/data()
+};
+
 declare function mba:getCollection($db as xs:string,
         $collectionName as xs:string) {
     let $collection :=
