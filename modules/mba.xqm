@@ -801,7 +801,6 @@ declare updating function mba:removeCurrentEvent($mba as element()) {
 
 
 (: Liefert ein neues MBA zurück ohne es einzufügen, dass soll später mit insert passieren. :)
-(:TODO Check with Schuetz if non updating function works as expected :)
 declare updating function mba:addBoilerplateElements($mba as element(), $databaseName as xs:string, $collectionName as xs:string) {
     let $scxml := mba:getSCXML($mba)
 
@@ -903,7 +902,7 @@ declare function mba:addBoilerplateElementsNonUpdating($mba as element(), $datab
 
 
 
-(: Die insert-Funktion verarbeitet nur konsistente MBAs von parallelen Hierarchien (die also auch schon Boilerplate-Elements enthalten :)
+(: Die insert-Funktion verarbeitet nur konsistente MBAs von parallelen Hierarchien :)
 declare updating function mba:insert($db as xs:string, $collection as xs:string, $parents as element()*, $mba as element()) {
     let $collectionDocument := mba:getCollection($db, $collection)
     (: let $mbaWithBoilerPlateElements := copy $c := $mba modify (
@@ -923,7 +922,3 @@ declare updating function mba:insert($db as xs:string, $collection as xs:string,
 
 };
 
-(: TODO: diese Funktion wirklich notwendig? kann man doch mithilfe von insert auch erledigen?! :)
-declare updating function mba:insertDescendant($mba as element(), $descendant as element()) {
-    ()
-};
