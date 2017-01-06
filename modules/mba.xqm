@@ -219,7 +219,7 @@ declare function mba:concretizeSimple($parents as element()*,
             </mba:topLevel>
         </mba:mba>
 
-    let $dbName := mba:getDatabaseName($parent)
+    let $dbName := mba:getRepositoryName($parent)
     let $collectionName := mba:getCollectionName($parent)
 
     (: let $concretization := copy $c := $concretization modify (
@@ -671,7 +671,7 @@ declare updating function mba:enqueueExternalEvent($mba as element(),
 };
 
 
-declare function mba:getDatabaseName($mba) {
+declare function mba:getRepositoryName($mba) {
     let $dbName :=
         if (not(db:name($mba))) then
             mba:getSCXML($mba)/sc:datamodel/sc:data[@id = '_x']/db/text()
@@ -682,7 +682,7 @@ declare function mba:getDatabaseName($mba) {
 };
 
 declare function mba:getCollectionName($mba) {
-    let $dbName := mba:getDatabaseName($mba)
+    let $dbName := mba:getRepositoryName($mba)
 
     let $path :=
         if (not(db:path($mba))) then
@@ -700,7 +700,7 @@ declare function mba:getCollectionName($mba) {
 
 (: Neue Funktion die den collectionEntry (Environment) zur Verfüung stellt :)
 declare function mba:getCollectionEntry($mba as element())  {
-    let $dbName := mba:getDatabaseName($mba)
+    let $dbName := mba:getRepositoryName($mba)
     let $collectionName := mba:getCollectionName($mba)
     let $document := db:open($dbName, 'collections.xml')
     let $collectionEntry := $document/mba:collections/mba:collection[@name = $collectionName]

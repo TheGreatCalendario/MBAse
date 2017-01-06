@@ -241,7 +241,7 @@ declare updating function sync:newDescendant(
     $parents  as xs:string?,
     $nodelist as element()*) {
   
-  let $dbName := mba:getDatabaseName($mba)
+  let $dbName := mba:getRepositoryName($mba)
   let $collectionName := mba:getCollectionName($mba)
   
   let $collection := mba:getCollection($dbName, $collectionName)
