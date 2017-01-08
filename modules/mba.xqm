@@ -918,7 +918,8 @@ declare updating function mba:insert($db as xs:string, $collection as xs:string,
         insert node $mbaWithBoilerPlateElements into $collectionDocument,
 
         if (not(fn:empty($parents))) then
-            insert node <mba ref="{$mba/@name}"/> into $parents/mba:concretizations
+            for $parent in $parents
+                return insert node <mba ref="{$mba/@name}"/> into $parent/mba:concretizations
         else (),
 
         mba:markAsUninitialized($mbaWithBoilerPlateElements)
