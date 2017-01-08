@@ -671,7 +671,7 @@ declare updating function mba:enqueueExternalEvent($mba as element(),
 };
 
 
-declare function mba:getRepositoryName($mba) {
+declare function mba:getRepositoryName($mba as element()) {
     let $dbName :=
         if (not(db:name($mba))) then
             mba:getSCXML($mba)/sc:datamodel/sc:data[@id = '_x']/db/text()
@@ -681,7 +681,7 @@ declare function mba:getRepositoryName($mba) {
     return $dbName
 };
 
-declare function mba:getCollectionName($mba) {
+declare function mba:getCollectionName($mba as element()) {
     let $dbName := mba:getRepositoryName($mba)
 
     let $path :=
