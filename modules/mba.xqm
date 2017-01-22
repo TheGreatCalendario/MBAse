@@ -564,6 +564,24 @@ declare function mba:getDescendants($mba as element()) as element()* {
     return functx:distinct-deep($allDescendants)
 };
 
+declare function mba:getDirectDescendants($mba as element()) as element()* {
+    if ($mba/@hierarchy = 'simple') then
+        $mba/descendant::mba:mba
+    else (
+      let $descendants := mba:getDescendants($mba)
+
+      let $secondLevel := mba:getSecondLevel($mba)
+      let $secondLevelNames := data($secondLevel/@name)
+
+      let $directAncestors :=
+      for $secondLevelName in $secondLevelNames
+        return mba:getDescendantsAtLevel($mba, $secondLevelName)
+
+      return $directAncestors
+    )
+
+};
+
 declare function mba:getDescendantsAtLevel($mba as element(), $level as xs:string) as element()* {
     if ($mba/@hierarchy = 'simple') then
         $mba/descendant::mba:mba[./mba:topLevel/@name = $level]
