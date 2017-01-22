@@ -553,10 +553,9 @@ declare function mba:getDescendantsAccumulator($mba as element()) as element()* 
     if ($mba/@hierarchy = 'simple') then
         $mba/descendant::mba:mba
     else (
-    let $descendants := $mba/../mba:mba[./mba:ancestors/mba:mba/@ref = $mba/@name]
-
-    for $descendant in $descendants
-    return ($descendant, mba:getDescendants($descendant))
+        let $descendants := $mba/../mba:mba[./mba:ancestors/mba:mba/@ref = $mba/@name]
+        for $descendant in $descendants
+            return ($descendant, mba:getDescendants($descendant))
     )
 };
 
