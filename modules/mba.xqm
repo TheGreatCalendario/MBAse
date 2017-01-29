@@ -496,27 +496,31 @@ declare updating function mba:removeSCXML($mba as element(),
 };
 
 
-(: TODO: Support parallel Hierarchies oder remove?? Schütz fragen
-  offensichtlich keinerlei Konsistenz-Check vorhanden
-   vorlage für reflektive funktion :)
-declare updating function mba:insertLevel($mba as element(),
-        $levelName as xs:string,
-        $parentLevelName as xs:string,
-        $childLevelName as xs:string?) {
-    let $parentLevel := $mba/mba:topLevel[@name = $parentLevelName]
-    let $parentLevel :=
-        if ($parentLevel) then $parentLevel
-        else $mba/mba:topLevel//mba:childLevel[@name = $parentLevelName]
 
-    let $childLevel := if ($childLevelName)
-    then $mba/mba:topLevel//mba:childLevel[@name = $childLevelName] else ()
+declare updating function mba:insertLevelSimple($mba as element(), $levelName as xs:string, $parentLevelName as xs:string, $childLevelName as xs:string?) {
+    if (not(mba:getDescendants($mba))) then (
 
-    let $newLevel :=
-        <mba:childLevel name="{$levelName}">
-            {$childLevel}
-        </mba:childLevel>
+        let $parentLevel := $mba/mba:topLevel[@name = $parentLevelName]
+        let $parentLevel :=
+            if ($parentLevel) then $parentLevel
+            else $mba/mba:topLevel//mba:childLevel[@name = $parentLevelName]
 
-    return insert node $newLevel into $parentLevel
+        let $childLevel :=
+            if ($childLevelName) then (
+                $mba/mba:topLevel//mba:childLevel[@name = $childLevelName]
+            ) else ()
+
+        let $newLevel :=
+            <mba:childLevel name="{$levelName}">
+                {$childLevel}
+            </mba:childLevel>
+
+        return insert node $newLevel into $parentLevel
+    ) else (
+    error(QName('http://www.dke.jku.at/MBA/err',
+            'InsertLevelDescendantCheck'),
+            concat('Level cannot be inserted because MBA ', $mba/@name/data(), ' has already descendants'))
+    )
 };
 
 declare function mba:getAncestorsAtLevel($mba as element(),
