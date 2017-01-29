@@ -19,8 +19,7 @@
  : You should have received a copy of the GNU General Public License along
  : with this program; if not, write to the Free Software Foundation, Inc.,
  : 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
-  
- : @author Christoph Schütz
+ :
  : @author Michael Weichselbaumer
  :)
 module namespace reflection='http://www.dke.jku.at/MBA/Reflection';
@@ -237,7 +236,7 @@ declare updating function reflection:refineTransitionTargetDefaultBehavior($tran
     return replace node $transition with $refinedTransition
 };
 
-declare updating function reflection:refineTransitionTargetCustomerBehavior($transition as element(), $target as xs:string, $evalFunction as item()) {
+declare updating function reflection:refineTransitionTargetCustomBehavior($transition as element(), $target as xs:string, $evalFunction as item()) {
     let $refinedTransition := reflection:getTransitionWithRefinedTarget($transition, $target, $evalFunction)
     return replace node $transition with $refinedTransition
 };
