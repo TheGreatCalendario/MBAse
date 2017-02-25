@@ -191,7 +191,7 @@ declare updating function mba:createCollection($db as xs:string,
 };
 
 
-declare function mba:concretize($parents as element()*,
+declare function mba:concretize($parents as element()+,
         $name as xs:string,
         $topLevel as xs:string) as element() {
 
@@ -199,13 +199,13 @@ declare function mba:concretize($parents as element()*,
         if ($parents[1]/@hierarchy = 'simple') then
             mba:concretizeSimple($parents, $name, $topLevel)
         else (
-            mba:concretizeParallel($parents, $name, $topLevel)
+            mba:concretizeParallel(($parents), $name, $topLevel)
         )
     return $concretization
 
 };
 
-declare function mba:concretizeSimple($parents as element()*,
+declare function mba:concretizeSimple($parents as element()+,
         $name as xs:string,
         $topLevel as xs:string) as element() {
     let $parent := $parents[1]
@@ -233,11 +233,11 @@ declare function mba:concretizeSimple($parents as element()*,
 
 (:call concretizeParallel2(IsMBa, "CoreCompetenceDKE", "module") :)
 
-declare function mba:concretizeParallel($parents as element()*, $name as xs:string, $topLevel as xs:string) as element()* {
+declare function mba:concretizeParallel($parents as element()+, $name as xs:string, $topLevel as xs:string) as element()* {
     mba:concretizeParallelAccumulator($parents, $name, $topLevel, ())
 };
 
-declare function mba:concretizeParallelAccumulator($parents as element()*, $name as xs:string, $topLevel as xs:string, $objectsCreated as element()*) as element()* {
+declare function mba:concretizeParallelAccumulator($parents as element()+, $name as xs:string, $topLevel as xs:string, $objectsCreated as element()*) as element()* {
 (: 1. Find out if $level is a valid level in all $parents :)
     let $validLevel :=
         every $parent in $parents satisfies
