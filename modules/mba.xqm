@@ -191,29 +191,26 @@ declare updating function mba:createCollection($db as xs:string,
 };
 
 
-declare function mba:concretize($parents as element()+,
-        $name as xs:string,
-        $topLevel as xs:string) as element() {
+declare function mba:concretize($parents as element()+, $name as xs:string, $topLevel as xs:string, $isDefault as xs:boolean) as element()* {
 
     let $concretization :=
         if ($parents[1]/@hierarchy = 'simple') then
-            mba:concretizeSimple($parents, $name, $topLevel)
+            mba:concretizeSimple($parents, $name, $topLevel, $isDefault)
         else (
-            mba:concretizeParallel(($parents), $name, $topLevel)
+            mba:concretizeParallel($parents, $name, $topLevel, $isDefault)
+
         )
     return $concretization
 
 };
 
-declare function mba:concretizeSimple($parents as element()+,
-        $name as xs:string,
-        $topLevel as xs:string) as element() {
+declare function mba:concretizeSimple($parents as element()+, $name as xs:string, $topLevel as xs:string, $isDefault as xs:boolean) as element() {
     let $parent := $parents[1]
 
     let $level := $parent/mba:topLevel//mba:childLevel[@name = $topLevel]
 
     let $concretization :=
-        <mba:mba name="{$name}" hierarchy="simple">
+        <mba:mba name="{$name}" hierarchy="simple" isDefault="{$isDefault}" >
             <mba:topLevel name="{$topLevel}">
                 {$level/*}
             </mba:topLevel>
@@ -233,11 +230,11 @@ declare function mba:concretizeSimple($parents as element()+,
 
 (:call concretizeParallel2(IsMBa, "CoreCompetenceDKE", "module") :)
 
-declare function mba:concretizeParallel($parents as element()+, $name as xs:string, $topLevel as xs:string) as element()* {
-    mba:concretizeParallelAccumulator($parents, $name, $topLevel, ())
+declare function mba:concretizeParallel($parents as element()+, $name as xs:string, $topLevel as xs:string, $isDefault as xs:boolean) as element()* {
+    mba:concretizeParallelAccumulator($parents, $name, $topLevel, $isDefault, ())
 };
 
-declare function mba:concretizeParallelAccumulator($parents as element()+, $name as xs:string, $topLevel as xs:string, $objectsCreated as element()*) as element()* {
+declare function mba:concretizeParallelAccumulator($parents as element()+, $name as xs:string, $topLevel as xs:string, $isDefault as xs:boolean, $objectsCreated as element()*) as element()* {
 (: 1. Find out if $level is a valid level in all $parents :)
     let $validLevel :=
         every $parent in $parents satisfies
@@ -303,7 +300,7 @@ declare function mba:concretizeParallelAccumulator($parents as element()+, $name
             )
 
         let $concretization :=
-            <mba xmlns="http://www.dke.jku.at/MBA" xmlns:sync="http://www.dke.jku.at/MBA/Synchronization" xmlns:sc="http://www.w3.org/2005/07/scxml" name="{$name}" topLevel="{$topLevel}" hierarchy="parallel" isDefault="true">
+            <mba xmlns="http://www.dke.jku.at/MBA" xmlns:sync="http://www.dke.jku.at/MBA/Synchronization" xmlns:sc="http://www.w3.org/2005/07/scxml" name="{$name}" topLevel="{$topLevel}" hierarchy="parallel" isDefault="{$isDefault} ">
                 <levels>
                     {$parentLevel}
                     {$subLevels}
@@ -331,7 +328,7 @@ declare function mba:concretizeParallelAccumulator($parents as element()+, $name
         return
             if (not($topLevel  = $secondLevel) and fn:empty(mba:getDescendantsAtLevel($parent, $secondLevel)[@isDefault = true()])) then (
             (: 2.1.1 there are no default descendants for second level -> they need to be created :)
-            mba:concretizeParallelAccumulator($parent, concat("default", $secondLevel, "Object"), $secondLevel, $objectsCreated)
+            mba:concretizeParallelAccumulator($parent, concat("default", $secondLevel, "Object"), $secondLevel, true(), $objectsCreated)
             ) else ()
 
     (: load all default descendants that are necessary and already exist (in db) :)
@@ -348,7 +345,7 @@ declare function mba:concretizeParallelAccumulator($parents as element()+, $name
             ) else ()
 
     let $secondLevelDefaultDescendants := ($secondLevelDefaultDescendantsThatAlreadyExist, $secondLevelDefaultDescendantsThatAreGenerated)
-    return mba:concretizeParallelAccumulator($secondLevelDefaultDescendants, $name, $topLevel, ($objectsCreated, $secondLevelDefaultDescendantsThatAreGenerated))
+    return mba:concretizeParallelAccumulator($secondLevelDefaultDescendants, $name, $topLevel, $isDefault, ($objectsCreated, $secondLevelDefaultDescendantsThatAreGenerated))
     )
     ) else (
     (: 1. raise eerror because $topLevel is not a valid level in all $parents :)
