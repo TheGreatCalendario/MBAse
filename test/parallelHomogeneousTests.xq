@@ -32,7 +32,6 @@ declare variable $db := 'myMBAse';
 declare variable $collectionName := 'parallelHomogenous';
 
 
-
 (: Create a dedicated collection for homogenous MBA's       
 mba:createCollection($db, $collectionName) :)
 
@@ -44,27 +43,27 @@ return mba:insert($db, $collectionName, (), $mbaNew) :)
 
 (: Concretize HoltonHotelChain on level rental - check if generating missing default MBAse works - multiple MBA objects are returned  
 let $mbaHolton := mba:getMBA($db, $collectionName, "HoltonHotelChain")
-let $mbaAustrianPresidentSuite := mba:concretizeParallel($mbaHolton, 'AustrianPresidentSuite', 'rental')
+let $mbaAustrianPresidentSuite := mba:concretizeParallel($mbaHolton, 'AustrianPresidentSuite', 'rental', true())
 return $mbaAustrianPresidentSuite  :)
 
 
 (: Concretize Holton Hotel Chain MBA - parallel level country  
 let $mbaHolton := mba:getMBA($db, $collectionName, "HoltonHotelChain")
-let $mbaAustria := mba:concretizeParallel($mbaHolton, 'Austria', 'country')
-return mba:insert($db, $collectionName, (), $mbaAustria)    :)
+let $mbaAustria := mba:concretizeParallel($mbaHolton, 'Austria', 'country', true())
+return mba:insert($db, $collectionName, ($mbaHolton), $mbaAustria)    :)
 
 
 (: Concretize HoltonHotelChain MBA & Austria MBA - proves that a new default-accomodationType-MBA is created to act as ancestor for AustrianPresidentSuite-MBA   
 let $mbaHolton := mba:getMBA($db, $collectionName, "HoltonHotelChain")
 let $mbaAustria := mba:getMBA($db, $collectionName, "Austria")
 
-let $mbaAustrianPresidentSuite := mba:concretizeParallel(($mbaHolton, $mbaAustria), 'AustrianPresidentSuite', 'rental') 
+let $mbaAustrianPresidentSuite := mba:concretizeParallel(($mbaHolton, $mbaAustria), 'AustrianPresidentSuite', 'rental', true()) 
 return $mbaAustrianPresidentSuite :)
 
 
 (: Concretize Holton Hotel Chain MBA - parallel level accomodationType  
 let $mbaHolton := mba:getMBA($db, $collectionName, "HoltonHotelChain")
-let $mbaPresidentSuite := mba:concretizeParallel($mbaHolton, 'PresidentSuite', 'accomodationType')
+let $mbaPresidentSuite := mba:concretizeParallel($mbaHolton, 'PresidentSuite', 'accomodationType', true())
 return mba:insert($db, $collectionName, (), $mbaPresidentSuite) :)
 
 
@@ -73,7 +72,7 @@ let $mbaHolton := mba:getMBA($db, $collectionName, "HoltonHotelChain")
 let $mbaAustria := mba:getMBA($db, $collectionName, "Austria")
 let $mbaPresidentSuite := mba:getMBA($db, $collectionName, "PresidentSuite") 
 
-let $mbaAustrianPresidentSuite := mba:concretizeParallel($mbaHolton, 'AustrianPresidentSuite', 'rental')
+let $mbaAustrianPresidentSuite := mba:concretizeParallel($mbaHolton, 'AustrianPresidentSuite', 'rental', true())
 return $mbaAustrianPresidentSuite  :)
 
 (: Concretize Austria & PresidentSuite MBA in order to create a rental MBA for a PresidentSuite in Austria 
@@ -81,12 +80,12 @@ let $mbaHolton := mba:getMBA($db, $collectionName, "HoltonHotelChain")
 let $mbaAustria := mba:getMBA($db, $collectionName, "Austria")
 let $mbaPresidentSuite := mba:getMBA($db, $collectionName, "PresidentSuite") 
 
-let $mbaAustrianPresidentSuite := mba:concretizeParallel(($mbaAustria, $mbaPresidentSuite), 'AustrianPresidentSuite', 'rental') 
+let $mbaAustrianPresidentSuite := mba:concretizeParallel(($mbaAustria, $mbaPresidentSuite), 'AustrianPresidentSuite', 'rental', true()) 
 return $mbaAustrianPresidentSuite :)
 
 (: Try to create a rental MBA by concretizing only one of the 2 required parents - fails because one parent is missing 
 let $mbaAustria := mba:getMBA($db, $collectionName, "Austria")
-let $mbaAustrianPresidentSuite := mba:concretizeParallel($mbaAustria, 'AustrianPresidentSuite', 'rental') 
+let $mbaAustrianPresidentSuite := mba:concretizeParallel($mbaAustria, 'AustrianPresidentSuite', 'rental', true()) 
 
 return $mbaAustrianPresidentSuite  :)
 
@@ -95,7 +94,7 @@ let $mbaHolton := mba:getMBA($db, $collectionName, "HoltonHotelChain")
 let $mbaAustria := mba:getMBA($db, $collectionName, "Austria")
 let $mbaPresidentSuite := mba:getMBA($db, $collectionName, "PresidentSuite")         
 
-let $mbaAustrianPresidentSuite := mba:concretizeParallel(($mbaHolton, $mbaAustria), 'AustrianPresidentSuite', 'rental') 
+let $mbaAustrianPresidentSuite := mba:concretizeParallel(($mbaHolton, $mbaAustria), 'AustrianPresidentSuite', 'rental', true()) 
 return $mbaAustrianPresidentSuite 
 
 
