@@ -541,11 +541,19 @@ declare function mba:getAncestors($mba as element()) as element()* {
     )
 };
 
+declare function mba:getDirectAncestorNames($mba as element()) as xs:string* {
+    if ($mba/@hierarchy = 'simple') then (
+        $mba/ancestor::mba:mba/@name/data()
+    ) else (
+        $mba/mba:ancestors/mba/@ref/data()
+    )
+};
+
 declare function mba:getDirectAncestors($mba as element()) as element()* {
     if ($mba/@hierarchy = 'simple') then
         $mba/ancestor::mba:mba
     else (
-        let $ancestors := $mba/..//mba:mba[@name = $mba/mba:ancestors/mba:mba/@ref]
+        let $ancestors := $mba/..//mba:mba[@name = mba:getDirectAncestorNames($mba)]
         return $ancestors
     )
 };
