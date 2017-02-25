@@ -320,18 +320,31 @@ declare function mba:concretizeParallelAccumulator($parents as element()+, $name
 
     ) else (
     (: 2. $topLevel is NOT second level of $parents ->
-         generate all second level default descendants that are necessary but do not exist :)
+        identify parents that have been specified and in fact are direct ancestors of mba that is about to be created :)
+    let $secondLevelDescendantsThatWereSpecified :=
+       for $parent in $parents
+       let $secondLevels := mba:getSecondLevel($parent)/@name/data()
+       for $secondLevel in $secondLevels
+       return
+            if ($topLevel = $secondLevel) then (
+               $parent
+            ) else()
+
+    (: AND ->
+        generate all second level default descendants that are necessary but do not exist :)
     let $secondLevelDefaultDescendantsThatAreGenerated :=
         for $parent in $parents
         let $secondLevels := mba:getSecondLevel($parent)/@name/data()
         for $secondLevel in $secondLevels
         return
-            if (not($topLevel  = $secondLevel) and fn:empty(mba:getDescendantsAtLevel($parent, $secondLevel)[@isDefault = true()])) then (
-            (: 2.1.1 there are no default descendants for second level -> they need to be created :)
+            if (not($topLevel  = $secondLevel) and fn:empty(mba:getDescendantsAtLevel($parent, $secondLevel)[@isDefault = true()])
+                and not(functx:is-value-in-sequence($topLevel, mba:getSecondLevel($secondLevelDescendantsThatWereSpecified)/@name/data()))) then (
+            (: 2.2.1 there are no default descendants for second level -> they need to be created :)
             mba:concretizeParallelAccumulator($parent, concat("default", $secondLevel, "Object"), $secondLevel, true(), $objectsCreated)
             ) else ()
 
-    (: load all default descendants that are necessary and already exist (in db) :)
+    (: AND ->
+        load all default descendants that are necessary and already exist (in db) :)
     let $secondLevelDefaultDescendantsThatAlreadyExist :=
         for $parent in $parents
         let $secondLevels := mba:getSecondLevel($parent)/@name/data()
@@ -339,12 +352,12 @@ declare function mba:concretizeParallelAccumulator($parents as element()+, $name
         return
             if (not(fn:empty(mba:getDescendantsAtLevel($parent, $secondLevel)[@isDefault = true()]))) then (
                 let $existingDescendant := mba:getDescendantsAtLevel($parent, $secondLevel)[@isDefault = true()]
-                return if (($topLevel != $existingDescendant/@topLevel/data())) then (
+                return if (($topLevel != $existingDescendant/@topLevel/data()) and not(functx:is-value-in-sequence($existingDescendant, $parents))) then (
                     $existingDescendant
                 ) else ()
             ) else ()
 
-    let $secondLevelDefaultDescendants := ($secondLevelDefaultDescendantsThatAlreadyExist, $secondLevelDefaultDescendantsThatAreGenerated)
+    let $secondLevelDefaultDescendants := ($secondLevelDefaultDescendantsThatAlreadyExist, $secondLevelDefaultDescendantsThatAreGenerated, $secondLevelDescendantsThatWereSpecified)
     return mba:concretizeParallelAccumulator($secondLevelDefaultDescendants, $name, $topLevel, $isDefault, ($objectsCreated, $secondLevelDefaultDescendantsThatAreGenerated))
     )
     ) else (
@@ -381,7 +394,7 @@ declare function mba:getLevel($mba as element(), $level as xs:string) as element
     return $level
 };
 
-declare function mba:getSecondLevel($mba as element()) as element()* {
+declare function mba:getSecondLevel($mba as element()*) as element()* {
     let $level :=
         if ($mba/@hierarchy = 'simple') then
             $mba/mba:topLevel/mba:childLevel
