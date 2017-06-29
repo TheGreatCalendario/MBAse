@@ -44,7 +44,7 @@ declare variable $mbaHolton := $mbaDocument/mba:mba;
 (: Check if refined model is behavior consistent to original model. expected result: true)
    This test is here because it is a precondition for the following tests regarding reflective functions 
    sccIsBehaviorConsistentSpecialization is used as the default behavior function - see API description
-return scc:isBehaviorConsistentSpecialization($scxmlRentalOriginal, $scxmlRentalRefined) :)
+return scc:isBehaviorConsistentSpecialization($scxmlRentalOriginal, $scxmlRentalRefined)
 
 declare variable $subState := 
   <sc:state id="RunningGood">   
@@ -52,52 +52,53 @@ declare variable $subState :=
 
 declare variable $originalState :=  $mbaHolton//sc:state[@id='Running'];
 
+return $mbaHolton;  :)
 
 (: Check if non-updating version of refine state function works. 
-Using an MBA that is loaded from file system makes it easier to be sure it has no descendants. expected result: refined state node  :) 
+Using an MBA that is loaded from file system makes it easier to be sure it has no descendants. expected result: refined state node   
 let $subState := 
   <sc:state id="RunningGood">   
   </sc:state>
 
 
 let $defaultBehavior := scc:isBehaviorConsistentSpecialization#2  
-return reflection:getRefinedState($originalState, $subState, $defaultBehavior)    
+return reflection:getRefinedState($originalState, $subState, $defaultBehavior)    :)
 
-(: Chif if a final node can also be inserted using the refine state function. expected result: refined state node
+(: Check if a final node can also be inserted using the refine state function. expected result: refined state node
 let $finalState := 
   <sc:final id="TheEnd">   
   </sc:final>
 
 let $defaultBehavior := scc:isBehaviorConsistentSpecialization#2  
-return reflection:getRefinedState($originalState, $finalState, $defaultBehavior)  :)
+return reflection:getRefinedState($originalState, $finalState, $defaultBehavior)    :)
 
 
-(: Check if updating version of refine state function works. Backup is necessary before executing this test.   
+(: Check if updating version of refine state function works. Backup is necessary before executing this test.    
 declare variable $originalStateAustriaFromDB := $mbaAustriaFromDB//sc:state[@id='OffSeason'];
 declare variable $subStateAustriaFromDB := 
   <sc:state id="StaffHome">
-  </sc:state>;  :)
+  </sc:state>; :)
   
 
 (: Step 1: execute updating function
    Step 2: return variable :)  
-(:reflection:refineStateDefaultBehavior($originalStateAustriaFromDB, $subStateAustriaFromDB):)
+(:reflection:refineStateDefaultBehavior($originalStateAustriaFromDB, $subStateAustriaFromDB) :)
 (: $mbaAustriaFromDB :)
 
   
-(: Check if refineState fails if an MBA has already descendants: expected: error 
+(: Check if refineState fails if an MBA has already descendants: expected: error
 For this purpose MBA is loaded from database  
 declare variable $originalStateFromDB :=  $mbaHoltonFromDB//sc:state[@id='Running'];
 
-reflection:refineStateDefaultBehavior($originalStateFromDB, $subState) :)
+reflection:refineStateDefaultBehavior($originalStateFromDB, $subState)  :)
 
 
-(: Check if extending with parallel region works. expected: parallel node  
+(: Check if extending with parallel region works. expected: parallel node 
 let $originalState :=  $mbaHolton//sc:state[@id='Restructuring']
 let $parallelState := <sc:state id="Renovating"></sc:state>
 
 let $defaultBehavior := scc:isBehaviorConsistentSpecialization#2
-return reflection:getParallelRegionExtension($originalState, $parallelState, $defaultBehavior, ()) :)
+return reflection:getParallelRegionExtension($originalState, $parallelState, $defaultBehavior, ())  :)
 
 
 (: Check if extending with parallel region fails because MBA has ancestors: expected: error  
@@ -110,22 +111,22 @@ return reflection:getParallelRegionExtension($originalState, $parallelState, $de
 (: Check if extending with parallel region works if an optionalNode is specified: expected: parallel node 
 let $originalState :=  $mbaHolton//sc:state[@id='Restructuring']
 let $parallelState := <sc:state id="Renovating"></sc:state>
-let $optionalState := <sc:transition event="someOtherEvent" target="Renovating"/>
+let $optionalState := <onentry><assign location="description" expr="Sorry we are currently closed"/></onentry>
 
 let $defaultBehavior := scc:isBehaviorConsistentSpecialization#2
-return reflection:getParallelRegionExtension($originalState, $parallelState, $defaultBehavior, $optionalState) :)
+return reflection:getParallelRegionExtension($originalState, $parallelState, $defaultBehavior, $optionalState)  :)
 
 (: Check if extending with parallel region that has multiple nodes in parameter parallelState works. expected parallel node 
 let $originalState :=  $mbaHolton//sc:state[@id='Restructuring']
 let $parallelState := <sc:state id="Renovating"></sc:state> 
-let $parallelState2 := <sc:state id="Evacuating"/>
+let $parallelState2 := <sc:state id="RecalculatePrices"/>
 let $parallelStates := ($parallelState, $parallelState2)
 
 let $defaultBehavior := scc:isBehaviorConsistentSpecialization#2
 return reflection:getParallelRegionExtension($originalState, $parallelStates, $defaultBehavior, ()) :)
 
 
-(: Check if refining condition of transition with no current condition works. expected: refined transition  
+(: Check if refining condition of transition with no current condition works. expected: refined transition   
 let $originalState :=  $mbaHolton//sc:state[@id='Restructuring']
 let $transition := $originalState//sc:transition[2]
 let $condition := "New Condition"
@@ -311,7 +312,7 @@ return reflection:getTransitionWithRefinedTarget($transition, $newTarget, $defau
 
 
 
-(: Check if refining target of transition that is not a valid substate of existing target. expected: error 
+(: Check if refining target of transition that is not a valid substate of existing target. expected: error
 let $inlineMBA := <mba xmlns="http://www.dke.jku.at/MBA" xmlns:sync="http://www.dke.jku.at/MBA/Synchronization" xmlns:sc="http://www.w3.org/2005/07/scxml" name="HoltonHotelChain" hierarchy="parallel" topLevel="business" isDefault="true">
     <levels>
       <level name="business"> 
@@ -346,7 +347,7 @@ let $newTarget := "SomeOtherState"
 let $defaultBehavior := scc:isBehaviorConsistentSpecialization#2
 return reflection:getTransitionWithRefinedTarget($transition, $newTarget, $defaultBehavior) :)
 
-(: Check if refining target of transition that has no target. expected: refined transition 
+(: Check if refining target of transition that has no target. expected: refined transition   
 let $inlineMBA := <mba xmlns="http://www.dke.jku.at/MBA" xmlns:sync="http://www.dke.jku.at/MBA/Synchronization" xmlns:sc="http://www.w3.org/2005/07/scxml" name="HoltonHotelChain" hierarchy="parallel" topLevel="business" isDefault="true">
     <levels>
       <level name="business"> 
@@ -379,7 +380,7 @@ let $transition := $originalState//sc:transition[2]
 let $newTarget := "RefinedRestructuring"
 
 let $defaultBehavior := scc:isBehaviorConsistentSpecialization#2
-return reflection:getTransitionWithRefinedTarget($transition, $newTarget, $defaultBehavior) :)  
+return reflection:getTransitionWithRefinedTarget($transition, $newTarget, $defaultBehavior) :)
 
 (: Check if refining source of transition works. expected: refined transition 
 let $inlineMBA := <mba xmlns="http://www.dke.jku.at/MBA" xmlns:sync="http://www.dke.jku.at/MBA/Synchronization" xmlns:sc="http://www.w3.org/2005/07/scxml" name="HoltonHotelChain" hierarchy="parallel" topLevel="business" isDefault="true">
@@ -410,13 +411,14 @@ let $inlineMBA := <mba xmlns="http://www.dke.jku.at/MBA" xmlns:sync="http://www.
     </mba>
 
 let $originalState :=  $inlineMBA//sc:state[@id='Restructuring']
-let $transition := $originalState//sc:transition[2]
+let $transition := $originalState//sc:transition[1]
 let $source := "RefinedRestructuring"
 
 let $defaultBehavior := scc:isBehaviorConsistentSpecialization#2
-return reflection:getTransitionWithRefinedSourceCustomBehavior($transition, $source, $defaultBehavior)  :)
+return reflection:refineSourceCustomBehavior($transition, $source, $defaultBehavior) :)
 
-(: Check if refining source of transition works. expected: error 
+
+(: Check if refining source of transition works. expected: error :)
 let $inlineMBA := <mba xmlns="http://www.dke.jku.at/MBA" xmlns:sync="http://www.dke.jku.at/MBA/Synchronization" xmlns:sc="http://www.w3.org/2005/07/scxml" name="HoltonHotelChain" hierarchy="parallel" topLevel="business" isDefault="true">
     <levels>
       <level name="business"> 
@@ -448,5 +450,6 @@ let $originalState :=  $inlineMBA//sc:state[@id='Restructuring']
 let $transition := $originalState//sc:transition[2]
 let $source := "Running"
 
-let $defaultBehavior := scc:isBehaviorConsistentSpecialization#2
-return reflection:getTransitionWithRefinedSourceCustomBehavior($transition, $source, $defaultBehavior)    :)
+let $defaultBehavior := scc:isBehaviorConsistentSpecialization#2 
+(:return reflection:refineSourceCustomBehavior($transition, $source, $defaultBehavior)   :) 
+return reflection:getTransitionWithRefinedSource($transition, $source, $defaultBehavior) 
