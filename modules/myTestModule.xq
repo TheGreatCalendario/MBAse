@@ -7,10 +7,10 @@ xquery version "3.0";
 : To change this template use File | Settings | File Templates.
 :)
 
-import module namespace mba = 'http://www.dke.jku.at/MBA' at 'D:/workspaces/master/MBAse/modules/mba.xqm';
-import module namespace functx = 'http://www.functx.com' at 'D:/workspaces/master/MBAse/modules/functx.xqm';
-import module namespace sc='http://www.w3.org/2005/07/scxml' at 'D:/workspaces/master/MBAse/modules/scxml.xqm';
-import module namespace test='http://www.dke.jku.at/MBA/test' at 'D:/workspaces/master/MBAse/test/mbaTest.xqm';
+import module namespace mba = 'http://www.dke.jku.at/MBA' at 'C:/Git/master/MBAse/modules/mba.xqm';
+import module namespace functx = 'http://www.functx.com' at 'C:/Git/master/MBAse/modules/functx.xqm';
+import module namespace sc='http://www.w3.org/2005/07/scxml' at 'C:/Git/master/MBAse/modules/scxml.xqm';
+import module namespace test='http://www.dke.jku.at/MBA/test' at 'C:/Git/master/MBAse/test/mbaTest.xqm';
 
 (: Properties for DB Connection :)
 
@@ -119,9 +119,9 @@ let $collection := mba:getCollection($db, $collection)
 let $documentFile := db:open($db, $collectionVar/@file)
 let $searchMBA := $documentFile/mba:mba[@name=$parentMbaName]
 
-return $parent :)
+return $parent  :)
 
-return mba:insert($db, $collection, $parent, $mbaNew) :)
+return mba:insert($db, $collection, $parent, $mbaNew)
 
 
 (:================================================================================================:)
@@ -193,8 +193,8 @@ return mba:insert($db, $collection, (), $mbaNew) :)
 
 (:================================================================================================:)
 
-(: Insert another mba from external file (as descendant) - Physics
-let $document := fn:doc('D:/workspaces/master/MBAse/example/Physics-MBA-NoBoilerPlateElements.xml')
+(: Insert another mba from external file (as descendant) - Physics: :) :)
+let $document := fn:doc('C:/Git/master/MBAse/example/Physics-MBA-NoBoilerPlateElements.xml')
 let $mbaNew := $document/mba:mba
 let $collection := 'parallelHierarchy'
 let $parentMbaName := 'TechnicalUniversityVienna'
@@ -216,4 +216,5 @@ let $searchMBA := $documentFile/mba:mba[@name=$parentMbaName]
 
 return $parent :)
 
-return mba:insert($db, $collection, $parent, $mbaNew)  :)
+(: return mba:insert($db, $collection, $parent, $mbaNew) :)
+return $parent

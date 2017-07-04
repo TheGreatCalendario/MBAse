@@ -25,12 +25,12 @@ xquery version "3.0";
  : @author Michael Weichselbaumer
  :)
 
-import module namespace mba = 'http://www.dke.jku.at/MBA' at 'D:/workspaces/master/MBAse/modules/mba.xqm';
-import module namespace functx = 'http://www.functx.com' at 'D:/workspaces/master/MBAse/modules/functx.xqm';
-import module namespace sc = 'http://www.w3.org/2005/07/scxml' at 'D:/workspaces/master/MBAse/modules/scxml.xqm';
-import module namespace scx='http://www.w3.org/2005/07/scxml/extension/' at 'D:/workspaces/master/MBAse/modules/scxml_extension.xqm';
-import module namespace scc='http://www.w3.org/2005/07/scxml/consistency/' at 'D:/workspaces/master/MBAse/modules/scxml_consistency.xqm';
-import module namespace reflection='http://www.dke.jku.at/MBA/Reflection' at 'D:/workspaces/master/MBAse/modules/reflection.xqm';
+import module namespace mba = 'http://www.dke.jku.at/MBA' at 'C:/Git/master/MBAse/modules/mba.xqm';
+import module namespace functx = 'http://www.functx.com' at 'C:/Git/master/MBAse/modules/functx.xqm';
+import module namespace sc = 'http://www.w3.org/2005/07/scxml' at 'C:/Git/master/MBAse/modules/scxml.xqm';
+import module namespace scx='http://www.w3.org/2005/07/scxml/extension/' at 'C:/Git/master/MBAse/modules/scxml_extension.xqm';
+import module namespace scc='http://www.w3.org/2005/07/scxml/consistency/' at 'C:/Git/master/MBAse/modules/scxml_consistency.xqm';
+import module namespace reflection='http://www.dke.jku.at/MBA/Reflection' at 'C:/Git/master/MBAse/modules/reflection.xqm';
 
 declare variable $db := 'myMBAse';
 declare variable $collectionName := 'parallelHomogenous';
