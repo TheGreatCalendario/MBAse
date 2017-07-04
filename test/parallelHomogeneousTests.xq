@@ -44,13 +44,13 @@ return mba:insert($db, $collectionName, (), $mbaNew) :)
 (: Concretize HoltonHotelChain on level rental - check if generating missing default MBAse works - multiple MBA objects are returned  
 let $mbaHolton := mba:getMBA($db, $collectionName, "HoltonHotelChain")
 let $mbaAustrianPresidentSuite := mba:concretizeParallel($mbaHolton, 'AustrianPresidentSuite', 'rental', true())
-return $mbaAustrianPresidentSuite  :)
+return $mbaAustrianPresidentSuite   :)
 
 
-(: Concretize Holton Hotel Chain MBA - parallel level country  
+(: Concretize Holton Hotel Chain MBA - parallel level country   
 let $mbaHolton := mba:getMBA($db, $collectionName, "HoltonHotelChain")
 let $mbaAustria := mba:concretizeParallel($mbaHolton, 'Austria', 'country', true())
-return mba:insert($db, $collectionName, ($mbaHolton), $mbaAustria)    :)
+return mba:insert($db, $collectionName, ($mbaHolton), $mbaAustria)   :)
 
 
 (: Concretize HoltonHotelChain MBA & Austria MBA - proves that a new default-accomodationType-MBA is created to act as ancestor for AustrianPresidentSuite-MBA   
@@ -75,27 +75,26 @@ let $mbaPresidentSuite := mba:getMBA($db, $collectionName, "PresidentSuite")
 let $mbaAustrianPresidentSuite := mba:concretizeParallel($mbaHolton, 'AustrianPresidentSuite', 'rental', true())
 return $mbaAustrianPresidentSuite  :)
 
-(: Concretize Austria & PresidentSuite MBA in order to create a rental MBA for a PresidentSuite in Austria 
+(: Concretize Austria & PresidentSuite MBA in order to create a rental MBA for a PresidentSuite in Austria
 let $mbaHolton := mba:getMBA($db, $collectionName, "HoltonHotelChain")
 let $mbaAustria := mba:getMBA($db, $collectionName, "Austria")
 let $mbaPresidentSuite := mba:getMBA($db, $collectionName, "PresidentSuite") 
 
 let $mbaAustrianPresidentSuite := mba:concretizeParallel(($mbaAustria, $mbaPresidentSuite), 'AustrianPresidentSuite', 'rental', true()) 
-return $mbaAustrianPresidentSuite :)
+return $mbaAustrianPresidentSuite  :)
 
-(: Try to create a rental MBA by concretizing only one of the 2 required parents - fails because one parent is missing 
+(: Try to create a rental MBA by concretizing only one of the 2 required parents - fails because one parent is missing
 let $mbaAustria := mba:getMBA($db, $collectionName, "Austria")
 let $mbaAustrianPresidentSuite := mba:concretizeParallel($mbaAustria, 'AustrianPresidentSuite', 'rental', true()) 
 
-return $mbaAustrianPresidentSuite  :)
+return $mbaAustrianPresidentSuite   :)
 
-(: Concretize HoltonHotelChain MBA & Austria MBA - works because concretize replaces HoltonHotelChain with appropiate default mba :)
+(: Concretize HoltonHotelChain MBA & Austria MBA - works because concretize replaces HoltonHotelChain with appropiate default mba   :)
 let $mbaHolton := mba:getMBA($db, $collectionName, "HoltonHotelChain")
 let $mbaAustria := mba:getMBA($db, $collectionName, "Austria")
 let $mbaPresidentSuite := mba:getMBA($db, $collectionName, "PresidentSuite")         
-
-let $mbaAustrianPresidentSuite := mba:concretizeParallel(($mbaHolton, $mbaAustria), 'AustrianPresidentSuite', 'rental', true()) 
-return $mbaAustrianPresidentSuite 
+let $mbaAustrianPresidentSuite := mba:concretizeParallel(($mbaAustria, $mbaHolton), 'AustrianPresidentSuite', 'rental', true()) 
+return $mbaAustrianPresidentSuite
 
 
 

@@ -29,9 +29,9 @@ xquery version "3.0";
 
 module namespace mbaTest = "http://www.dke.jku.at/MBA/test";
 
-import module namespace mba = 'http://www.dke.jku.at/MBA' at 'D:/workspaces/master/MBAse/modules/mba.xqm';
-import module namespace functx = 'http://www.functx.com' at 'D:/workspaces/master/MBAse/modules/functx.xqm';
-import module namespace sc='http://www.w3.org/2005/07/scxml' at 'D:/workspaces/master/MBAse/modules/scxml.xqm';
+import module namespace mba = 'http://www.dke.jku.at/MBA' at 'C:/Git/master/MBAse/modules/mba.xqm';
+import module namespace functx = 'http://www.functx.com' at 'C:/Git/master/MBAse/modules/functx.xqm';
+import module namespace sc='http://www.w3.org/2005/07/scxml' at 'C:/Git/master/MBAse/modules/scxml.xqm';
 
 
 declare variable $mbaTest:db := 'myMBAse';

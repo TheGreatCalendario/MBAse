@@ -109,9 +109,18 @@ declare updating function reflection:extendWithParallelRegionDefaultBehavior($st
     return replace node $state with $parallelRegionNode
 };
 
+(:TODO: refactor function extendWithParallelRegionDefaultBehavior (&Custom!) so that they are called addParallelStateDefaultBehavior! :)
+declare updating function reflection:addParallelStateDefaultBehavior($state as element(), $parallelState as element(), $optionalNodes as element()?) {
+  reflection:extendWithParallelRegionDefaultBehavior($state, $parallelState, $optionalNodes)
+};
+
 declare updating function reflection:extendWithParallelRegionCustomBehavior($state as element(), $parallelState as element(), $evalFunction as item(), $optionalNodes as element()?) {
     let $parallelRegionNode := reflection:getParallelRegionExtension($state, $parallelState, $evalFunction, $optionalNodes)
     return replace node $state with $parallelRegionNode
+};
+
+declare updating function reflection:addParallelStateCustomBehavior($state as element(), $parallelState as element(), $evalFunction as item(), $optionalNodes as element()?) {
+  reflection:extendWithParallelRegionCustomBehavior($state, $parallelState, $evalFunction, $optionalNodes)
 };
 
 declare function reflection:getTransitionWithRefinedPreCondition($transition as element(), $condition as xs:string, $evalFunction as item()) as element()* {
@@ -236,9 +245,18 @@ declare updating function reflection:refineTransitionTargetDefaultBehavior($tran
     return replace node $transition with $refinedTransition
 };
 
+(:TODO: Refactor refineTransitionTargetDefaultBehavior (+Custom!) so that they are called refineTargetDefaultBehavior etc :)
+declare updating function reflection:refineTargetDefaultBehavior($transition as element(), $target as xs:string) {
+    reflection:refineTransitionTargetDefaultBehavior($transition, $target)
+};
+
 declare updating function reflection:refineTransitionTargetCustomBehavior($transition as element(), $target as xs:string, $evalFunction as item()) {
     let $refinedTransition := reflection:getTransitionWithRefinedTarget($transition, $target, $evalFunction)
     return replace node $transition with $refinedTransition
+};
+
+declare updating function reflection:refineTargetCustomBehavior($transition as element(), $target as xs:string, $evalFunction as item()) {
+    reflection:refineTransitionTargetCustomBehavior($transition, $target, $evalFunction)
 };
 
 
@@ -279,7 +297,16 @@ declare updating function reflection:refineTransitionSourceDefaultBehavior($tran
     return replace node sc:getSourceState($transition) with $refinedTransitionStateNode
 };
 
+(:TODO: Refactor refineTransitionSourceDefaultBehavior (+Custom!) so that they are called refineSourceDefaultBehavior etc :)
+declare updating function reflection:refineSourceDefaultBehavior($transition as element(), $source as xs:string) {
+   reflection:refineTransitionSourceDefaultBehavior($transition, $source)
+};
+
 declare updating function reflection:refineTransitionSourceCustomBehavior($transition as element(), $target as xs:string,  $evalFunction as item()) {
     let $refinedTransition := reflection:getTransitionWithRefinedSource($transition, $target, $evalFunction)
     return replace node $transition with $refinedTransition
+};
+
+declare updating function reflection:refineSourceCustomBehavior($transition as element(), $target as xs:string,  $evalFunction as item()) {
+    reflection:refineTransitionSourceCustomBehavior($transition, $target, $evalFunction)
 };
