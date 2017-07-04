@@ -38,8 +38,11 @@ declare variable $collectionName := 'parallelHomogenous';
 declare variable $mbaHoltonFromDB := mba:getMBA($db, $collectionName, "HoltonHotelChain");
 declare variable $mbaAustriaFromDB := mba:getMBA($db, $collectionName, "Austria");
 
-declare variable $mbaDocument := fn:doc('D:/workspaces/master/MBAse/example/heteroHomogeneous/HoltonHotelChain-MBA-NoBoilerPlateElements.xml');
+declare variable $mbaDocument := fn:doc('C:/Git/master/MBAse/example/heteroHomogeneous/HoltonHotelChain-MBA-NoBoilerPlateElements.xml');
 declare variable $mbaHolton := $mbaDocument/mba:mba;
+
+declare variable $originalState :=  $mbaHolton//sc:state[@id='Running'];
+
 
 (: Check if refined model is behavior consistent to original model. expected result: true)
    This test is here because it is a precondition for the following tests regarding reflective functions 
@@ -50,27 +53,25 @@ declare variable $subState :=
   <sc:state id="RunningGood">   
   </sc:state>;
 
-declare variable $originalState :=  $mbaHolton//sc:state[@id='Running'];
-
 return $mbaHolton;  :)
 
-(: Check if non-updating version of refine state function works. 
-Using an MBA that is loaded from file system makes it easier to be sure it has no descendants. expected result: refined state node   
+(: Check if non-updating version of refine state function works.  
+Using an MBA that is loaded from file system makes it easier to be sure it has no descendants. expected result: refined state node 
 let $subState := 
   <sc:state id="RunningGood">   
   </sc:state>
 
 
 let $defaultBehavior := scc:isBehaviorConsistentSpecialization#2  
-return reflection:getRefinedState($originalState, $subState, $defaultBehavior)    :)
+return reflection:getRefinedState($originalState, $subState, $defaultBehavior)  :)
 
-(: Check if a final node can also be inserted using the refine state function. expected result: refined state node
+(: Check if a final node can also be inserted using the refine state function. expected result: refined state node 
 let $finalState := 
   <sc:final id="TheEnd">   
   </sc:final>
 
 let $defaultBehavior := scc:isBehaviorConsistentSpecialization#2  
-return reflection:getRefinedState($originalState, $finalState, $defaultBehavior)    :)
+return reflection:getRefinedState($originalState, $finalState, $defaultBehavior) :)
 
 
 (: Check if updating version of refine state function works. Backup is necessary before executing this test.    
@@ -382,7 +383,7 @@ let $newTarget := "RefinedRestructuring"
 let $defaultBehavior := scc:isBehaviorConsistentSpecialization#2
 return reflection:getTransitionWithRefinedTarget($transition, $newTarget, $defaultBehavior) :)
 
-(: Check if refining source of transition works. expected: refined transition 
+(: Check if refining source of transition works. expected: refined transition :)
 let $inlineMBA := <mba xmlns="http://www.dke.jku.at/MBA" xmlns:sync="http://www.dke.jku.at/MBA/Synchronization" xmlns:sc="http://www.w3.org/2005/07/scxml" name="HoltonHotelChain" hierarchy="parallel" topLevel="business" isDefault="true">
     <levels>
       <level name="business"> 
@@ -415,10 +416,11 @@ let $transition := $originalState//sc:transition[1]
 let $source := "RefinedRestructuring"
 
 let $defaultBehavior := scc:isBehaviorConsistentSpecialization#2
-return reflection:refineSourceCustomBehavior($transition, $source, $defaultBehavior) :)
+return reflection:getTransitionWithRefinedSource($transition, $source, $defaultBehavior) 
+(: return reflection:refineSourceCustomBehavior($transition, $source, $defaultBehavior) :)
 
 
-(: Check if refining source of transition works. expected: error :)
+(: Check if refining source of transition works. expected: error 
 let $inlineMBA := <mba xmlns="http://www.dke.jku.at/MBA" xmlns:sync="http://www.dke.jku.at/MBA/Synchronization" xmlns:sc="http://www.w3.org/2005/07/scxml" name="HoltonHotelChain" hierarchy="parallel" topLevel="business" isDefault="true">
     <levels>
       <level name="business"> 
@@ -451,5 +453,7 @@ let $transition := $originalState//sc:transition[2]
 let $source := "Running"
 
 let $defaultBehavior := scc:isBehaviorConsistentSpecialization#2 
-(:return reflection:refineSourceCustomBehavior($transition, $source, $defaultBehavior)   :) 
-return reflection:getTransitionWithRefinedSource($transition, $source, $defaultBehavior) 
+
+return reflection:getTransitionWithRefinedSource($transition, $source, $defaultBehavior) :)
+(: probably outdated 
+return reflection:refineSourceCustomBehavior($transition, $source, $defaultBehavior)   :)

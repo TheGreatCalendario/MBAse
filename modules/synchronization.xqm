@@ -91,7 +91,7 @@ declare function sync:ancestorAtLevelSatisfies
     ($mba   as element(),
      $level as xs:string,
      $cond  as xs:string) as xs:boolean {
-  let $ancestor   := mba:getAncestorAtLevel($mba, $level)
+  let $ancestor   := mba:getAncestorsAtLevel($mba, $level)
   let $dataModels := sc:selectDataModels(mba:getConfiguration($ancestor))
   
   return sync:eval($cond, $dataModels)
@@ -101,7 +101,7 @@ declare function sync:ancestorAtLevelIsInState($mba     as element(),
                                                $level   as xs:string,
                                                $stateId as xs:string) 
     as xs:boolean {
-  let $ancestor := mba:getAncestorAtLevel($mba, $level)
+  let $ancestor := mba:getAncestorsAtLevel($mba, $level)
   
   return mba:isInState($ancestor, $stateId)
 };
@@ -111,7 +111,7 @@ declare updating function sync:sendAncestor($mba     as element(),
                                             $level   as xs:string,
                                             $param   as element()*,
                                             $content as element()?) {
-  let $ancestor := mba:getAncestorAtLevel($mba, $level)
+  let $ancestor := mba:getAncestorsAtLevel($mba, $level)
   
   let $event := 
     <event xmlns="" name="{$eventId}">
@@ -138,7 +138,7 @@ declare updating function sync:assignAncestor($mba        as element(),
                                               $attribute  as xs:string?,
                                               $nodelist   as element()*,
                                               $level      as xs:string) {
-  let $ancestor := mba:getAncestorAtLevel($mba, $level)
+  let $ancestor := mba:getAncestorsAtLevel($mba, $level)
   
   let $configuration := mba:getConfiguration($ancestor)
   let $dataModels := sc:selectDataModels($configuration)
@@ -262,7 +262,7 @@ declare updating function sync:newDescendant(
   let $parentElements := 
     for $p in $parents return mba:getMBA($dbName, $collectionName, $p)
   
-  let $new := mba:concretize($parentElements, $name, $level)
+  let $new := mba:concretize($parentElements, $name, $level, true())
   
   return (
     insert node $new into 

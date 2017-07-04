@@ -25,8 +25,8 @@ xquery version "3.0";
  : @author Michael Weichselbaumer
  :)
 
-import module namespace mba = 'http://www.dke.jku.at/MBA' at 'D:/workspaces/master/MBAse/modules/mba.xqm';
-import module namespace functx = 'http://www.functx.com' at 'D:/workspaces/master/MBAse/modules/functx.xqm';
+import module namespace mba = 'http://www.dke.jku.at/MBA' at 'C:/Git/master/MBAse/modules/mba.xqm';
+import module namespace functx = 'http://www.functx.com' at 'C:/Git/master/MBAse/modules/functx.xqm';
 
 declare variable $db := 'myMBAse';
 declare variable $collectionName := 'parallelHomogenous';

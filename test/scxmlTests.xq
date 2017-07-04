@@ -25,10 +25,10 @@ xquery version "3.0";
  : @author Michael Weichselbaumer
  :)
 
-import module namespace mba = 'http://www.dke.jku.at/MBA' at 'D:/workspaces/master/MBAse/modules/mba.xqm';
-import module namespace functx = 'http://www.functx.com' at 'D:/workspaces/master/MBAse/modules/functx.xqm';
-import module namespace sc = 'http://www.w3.org/2005/07/scxml' at 'D:/workspaces/master/MBAse/modules/scxml.xqm';
-import module namespace scx='http://www.w3.org/2005/07/scxml/extension/' at 'D:/workspaces/master/MBAse/modules/scxml_extension.xqm';
+import module namespace mba = 'http://www.dke.jku.at/MBA' at 'C:/Git/MBAse/modules/mba.xqm';
+import module namespace functx = 'http://www.functx.com' at 'C:/Git/MBAse/modules/functx.xqm';
+import module namespace sc = 'http://www.w3.org/2005/07/scxml' at 'C:/Git/MBAse/modules/scxml.xqm';
+import module namespace scx='http://www.w3.org/2005/07/scxml/extension/' at 'C:/Git/MBAse/modules/scxml_extension.xqm';
 
 
 declare variable $db := 'myMBAse';
