@@ -168,25 +168,31 @@ declare updating function mba:insertAsCollection($db as xs:string,
     else ()(: can only insert MBAs with simple hierarchy as collection :)
 };
 
-(: Funktion zur Erstellung einer Parallel-Hierarchy-Collection
+(: Funktion zur Erstellung einer leeren-Collection
 Zuerst wird createCollection aufgerufen, dann wird mithilfe von insert in die Collection eingefügt :)
 declare updating function mba:createCollection($db as xs:string,
-        $name as xs:string) {
-    let $document := db:open($db, 'collections.xml')
-    let $collectionName := $name
-    let $fileName := 'collections/' || $collectionName || '.xml'
-    let $collectionEntry :=
-        <collection name='{$collectionName}' file="{$fileName}" hierarchy="parallel">
-            <uninitialized/>
-            <updated/>
-        </collection>
+        $name as xs:string, $hierarchyType as xs:string) {
+    if ($hierarchyType = 'simple' or $hierarchyType = 'parallel') then
+       let $document := db:open($db, 'collections.xml')
+       let $collectionName := $name
+       let $fileName := 'collections/' || $collectionName || '.xml'
+       let $collectionEntry :=
+          <collection name='{$collectionName}' file="{$fileName}" hierarchy="{$hierarchyType}">
+             <uninitialized/>
+             <updated/>
+          </collection>
 
-    let $collectionFile :=
-        <collection xmlns="http://www.dke.jku.at/MBA" name="{$collectionName}"/>
+       let $collectionFile :=
+          <collection xmlns="http://www.dke.jku.at/MBA" name="{$collectionName}"/>
 
-    return (
-        db:add($db, $collectionFile, $fileName),
-        insert node $collectionEntry into $document/mba:collections
+       return (
+          db:add($db, $collectionFile, $fileName),
+             insert node $collectionEntry into $document/mba:collections
+          )
+    else (
+        error(QName('http://www.dke.jku.at/MBA/err',
+                'CollectionConstraintCheck'),
+                'Hierarchy type of collection must be either simple or parallel')
     )
 };
 
