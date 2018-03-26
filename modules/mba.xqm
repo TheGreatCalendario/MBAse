@@ -511,6 +511,13 @@ declare updating function mba:removeSCXML($mba as element(),
         delete node $elements/sc:scxml[@name = $scxmlName]
 };
 
+declare updating function mba:insertLevel($mba as element(), $levelName as xs:string, $parentLevelName as xs:string, $childLevelName as xs:string?) {
+        if ($mba/@hierarchy = 'simple') then
+            mba:insertLevelSimple($mba, $levelName, $parentLevelName, $childLevelName)
+        else (
+            mba:insertLevelParallel($mba, $levelName, $parentLevelName, $childLevelName)
+        )
+};
 
 
 declare updating function mba:insertLevelSimple($mba as element(), $levelName as xs:string, $parentLevelName as xs:string, $childLevelName as xs:string?) {
@@ -536,6 +543,25 @@ declare updating function mba:insertLevelSimple($mba as element(), $levelName as
     error(QName('http://www.dke.jku.at/MBA/err',
             'InsertLevelDescendantCheck'),
             concat('Level cannot be inserted because MBA ', $mba/@name/data(), ' has already descendants'))
+    )
+};
+
+declare updating function mba:insertLevelParallel($mba as element(), $levelName as xs:string, $parentLevelName as xs:string, $childLevelName as xs:string?) {
+    if (not(mba:getDescendants($mba))) then (
+
+        let $newLevel :=
+            <mba:level name="{$levelName}">
+                <elements></elements>
+                <parentLevels>
+                    <level ref="{$parentLevelName}"/>
+                </parentLevels>
+            </mba:level>
+
+        return (insert node $newLevel into $mba/mba:levels, replace node mba:getLevel($mba, $childLevelName)/mba:parentLevels/mba:level[@ref = fn:string($parentLevelName)] with <level ref="{$levelName}"/>)
+    ) else (
+        error(QName('http://www.dke.jku.at/MBA/err',
+                'InsertLevelDescendantCheck'),
+                concat('Level cannot be inserted because MBA ', $mba/@name/data(), ' has already descendants'))
     )
 };
 
