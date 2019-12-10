@@ -13,6 +13,9 @@
               <sc:transition event="createAccomodationType">
                 <sync:newDescendant name="$_event/data/name" level="accomodationType"/>
               </sc:transition>
+			  <sc:transition event="createCountry">
+                <sync:newDescendant name="$_event/data/name" level="country"/>
+              </sc:transition>
               <sc:transition event="reopen" target="Running"/>
             </sc:state>
             <sc:state id="Running">
@@ -34,6 +37,12 @@
             </sc:initial>
             <sc:state id="InDevelopment">
               <sc:transition event="launch" target="OnOffer"/>
+			  <sc:transition event="setLateFee">
+                  <sc:assign location="$lateCheckoutFee" expr="$_event/data/text()"/>
+              </sc:transition>
+			  <sc:transition event="setMaxRate">
+                  <sc:assign location="$maximumRate" expr="$_event/data/text()"/>
+              </sc:transition>
             </sc:state>            
             <sc:state id="OnOffer">
               <sc:transition event="cancel" target="Canceled"/>
@@ -61,6 +70,12 @@
               </sc:initial>
               <sc:state id="OffSeason">
                 <sc:transition event="startHighSeason" target="HighSeason"/>
+				<sc:transition event="setPremium">
+                  <sc:assign location="$highSeasonPremium" expr="$_event/data/text()"/>
+				</sc:transition>
+				<sc:transition event="setVat">
+                  <sc:assign location="$vat" expr="$_event/data/text()"/>
+				</sc:transition>
               </sc:state>
               <sc:state id="HighSeason">
                 <sc:transition event="endHighSeason" target="OffSeason"/>
@@ -78,6 +93,7 @@
                 <sc:data id="renter"/>
                 <sc:data id="duration"/>
                 <sc:data id="assignedRoom"/>
+				<sc:data id="rate"/>
               </sc:datamodel>
               <sc:initial>
                 <sc:transition target="Opening"/>
@@ -85,6 +101,12 @@
               <sc:state id="Opening">
                 <sc:transition event="setDuration">
                   <sc:assign location="$duration" expr="$_event/data/text()"/>
+                </sc:transition>
+				<sc:transition event="setRate">
+                  <sc:assign location="$rate" expr="$_event/data/text()"/>
+                </sc:transition>
+				<sc:transition event="setRoom">
+                  <sc:assign location="$assignedRoom" expr="$_event/data/text()"/>
                 </sc:transition>
                 <sc:transition event="pickupKeys" target="Open"/>
               </sc:state>
