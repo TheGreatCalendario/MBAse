@@ -90,11 +90,13 @@ declare function scc:getAllRefinedTransitionsWithRelevantSourceAndTargetState($o
 declare function scc:isEveryOriginalTransitionInRefined($originalScxml as element(), $refinedScxml as element()) as xs:boolean {
     let $statesOriginal := scc:getAllStates($originalScxml)
     let $originalTransitions := $statesOriginal//sc:transition
+    let $originalTransitionsWithTarget := $statesOriginal//sc:transition[@target]
     let $refinedTransitionsToCheck := scc:getAllRefinedTransitionsWithRelevantSourceAndTargetState($originalScxml, $refinedScxml)
+    let $refinedTransitionsWithTargetToCheck := $refinedTransitionsToCheck[@target]
 
-    (: if number of refinedTransitionsToCheck is greater than number of originalTransitions, a new transition between existing states has been introduced
-        else if number is smaller, a transition has been removed. both is not allowed :)
-    return if (fn:count($refinedTransitionsToCheck) = fn:count($originalTransitions)) then (
+    (: if number of refinedTransitionsToCheck is smaller a transition has been removed. if the number is greater than number of originalTransitions, a new transition with no target state has been
+       introduced which is ok. :)
+    return if (fn:count($refinedTransitionsToCheck) >= fn:count($originalTransitions) and fn:count($refinedTransitionsWithTargetToCheck) = fn:count($originalTransitionsWithTarget)) then (
         let $noOfMatchingTransitionsList :=
             for $orginalTransition in $originalTransitions
             let $matchingTransitions :=
