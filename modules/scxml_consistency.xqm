@@ -33,6 +33,10 @@ import module namespace sc = 'http://www.w3.org/2005/07/scxml' at 'C:/Git/master
 
 
 declare function scc:getAllStates($scxml) as element()* {
+    $scxml/(sc:state | sc:parallel | sc:final)
+};
+
+declare function scc:getAllStatesAndSubstates($scxml) as element()* {
     $scxml//(sc:state | sc:parallel | sc:final)
 };
 
@@ -43,7 +47,7 @@ declare function scc:getStateAndSubstates($scxml as element(), $state as xs:stri
 (: this function returns all states (including their substates) of an original model from its' refined model :)
 declare function scc:getAllOriginalStatesFromRefined($originalScxml as element(), $refinedScxml as element()) as element()* {
     let $statesOriginal := scc:getAllStates($originalScxml)
-    let $statesRefined := scc:getAllStates($refinedScxml)
+    let $statesRefined := scc:getAllStatesAndSubstates($refinedScxml)
 
     let $refinedStatesFromOriginal :=
         for $refinedState in $statesRefined
@@ -60,7 +64,6 @@ declare function scc:getAllRelevantStateIdsRelevantToOriginalFromRefined($origin
 
 declare function scc:getAllRefinedTransitionsWithRelevantTargetState($originalScxml as element(), $refinedScxml as element()) as element()* {
     let $refinedStatesFromOriginal := scc:getAllOriginalStatesFromRefined($originalScxml, $refinedScxml)
-
     (: return all transitions with relevant or no target state :)
     let $allStateIdsRelevantToOriginalModel := scc:getAllRelevantStateIdsRelevantToOriginalFromRefined($refinedStatesFromOriginal)
     let $refinedTransitionsWithRelevantTargetState :=
@@ -76,8 +79,8 @@ declare function scc:getAllRefinedTransitionsWithRelevantSourceAndTargetState($o
     let $refinedTransitionsWithRelevantSourceAndTargetState :=
         for $transition in scc:getAllRefinedTransitionsWithRelevantTargetState($originalScxml, $refinedScxml)
         return if ((not(functx:is-value-in-sequence($transition/../@id/data(), scc:getAllStates($originalScxml)/@id/data())) and
-                not(functx:is-value-in-sequence($transition/@target/data(), scc:getAllStates($originalScxml)/@id/data()))) and
-                not(fn:empty($transition/@target))
+                not(functx:is-value-in-sequence($transition/@target/data(), functx:value-except(scc:getAllStates($originalScxml)/@id/data(), $transition/ancestor::sc:state/descendant-or-self::sc:state/@id/data())))  and
+                not(fn:empty($transition/@target)))
         ) then (
                 ()
             ) else (
@@ -90,13 +93,15 @@ declare function scc:getAllRefinedTransitionsWithRelevantSourceAndTargetState($o
 declare function scc:isEveryOriginalTransitionInRefined($originalScxml as element(), $refinedScxml as element()) as xs:boolean {
     let $statesOriginal := scc:getAllStates($originalScxml)
     let $originalTransitions := $statesOriginal//sc:transition
-    let $originalTransitionsWithTarget := $statesOriginal//sc:transition[@target]
+    let $originalTransitionsWithTarget := $statesOriginal//sc:transition[@target!=../@id/data()]
     let $refinedTransitionsToCheck := scc:getAllRefinedTransitionsWithRelevantSourceAndTargetState($originalScxml, $refinedScxml)
-    let $refinedTransitionsWithTargetToCheck := $refinedTransitionsToCheck[@target]
+    let $filteredTransition :=  $refinedTransitionsToCheck[@target != ../@id/data()]
+    let $refinedTransitionsWithTargetToCheck := for $filterTransition in $filteredTransition where $filterTransition/@target/data() != scc:getAllStatesAndSubstates($filteredTransition/..)/@id/data() return $filterTransition
 
     (: if number of refinedTransitionsToCheck is smaller a transition has been removed. if the number is greater than number of originalTransitions, a new transition with no target state has been
        introduced which is ok. :)
-    return if (fn:count($refinedTransitionsToCheck) >= fn:count($originalTransitions) and fn:count($refinedTransitionsWithTargetToCheck) = fn:count($originalTransitionsWithTarget)) then (
+    return if ((fn:count($refinedTransitionsToCheck) >= fn:count($originalTransitions) and fn:count($refinedTransitionsWithTargetToCheck) = fn:count($originalTransitionsWithTarget))
+            or ((fn:count($refinedTransitionsToCheck) = fn:count($originalTransitions)))) then (
         let $noOfMatchingTransitionsList :=
             for $orginalTransition in $originalTransitions
             let $matchingTransitions :=
@@ -203,8 +208,8 @@ declare function scc:isRefinedEvent($originalEvent as xs:string, $refinedEvent a
 
 
 declare function scc:isBehaviorConsistentSpecialization($originalScxml as element(), $refinedScxml as element()) as xs:boolean {
-    let $scxmlOriginalStates := scc:getAllStates($originalScxml)
-    let $scxmlRefinedStates := scc:getAllStates($refinedScxml)
+    let $scxmlOriginalStates := scc:getAllStatesAndSubstates($originalScxml)
+    let $scxmlRefinedStates := scc:getAllStatesAndSubstates($refinedScxml)
 
     return (scc:isEveryOriginalStateInRefined($scxmlOriginalStates, $scxmlRefinedStates) and scc:isEveryOriginalTransitionInRefined($originalScxml, $refinedScxml))
 };
