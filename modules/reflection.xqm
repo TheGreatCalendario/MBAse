@@ -103,24 +103,15 @@ declare function reflection:getParallelRegionExtension($state as element(), $par
     )
 };
 
-declare updating function reflection:extendWithParallelRegionDefaultBehavior($state as element(), $parallelState as element(), $optionalNodes as element()?) {
+declare updating function reflection:addParallelStateDefaultBehavior($state as element(), $parallelState as element(), $optionalNodes as element()?) {
     let $defaultBehaviorFunction := scc:isBehaviorConsistentSpecialization#2
     let $parallelRegionNode := reflection:getParallelRegionExtension($state, $parallelState, $defaultBehaviorFunction, $optionalNodes)
     return replace node $state with $parallelRegionNode
 };
 
-(:TODO: refactor function extendWithParallelRegionDefaultBehavior (&Custom!) so that they are called addParallelStateDefaultBehavior! :)
-declare updating function reflection:addParallelStateDefaultBehavior($state as element(), $parallelState as element(), $optionalNodes as element()?) {
-  reflection:extendWithParallelRegionDefaultBehavior($state, $parallelState, $optionalNodes)
-};
-
-declare updating function reflection:extendWithParallelRegionCustomBehavior($state as element(), $parallelState as element(), $evalFunction as item(), $optionalNodes as element()?) {
+declare updating function reflection:addParallelStateCustomBehavior($state as element(), $parallelState as element(), $evalFunction as item(), $optionalNodes as element()?) {
     let $parallelRegionNode := reflection:getParallelRegionExtension($state, $parallelState, $evalFunction, $optionalNodes)
     return replace node $state with $parallelRegionNode
-};
-
-declare updating function reflection:addParallelStateCustomBehavior($state as element(), $parallelState as element(), $evalFunction as item(), $optionalNodes as element()?) {
-  reflection:extendWithParallelRegionCustomBehavior($state, $parallelState, $evalFunction, $optionalNodes)
 };
 
 declare function reflection:getTransitionWithRefinedPreCondition($transition as element(), $condition as xs:string, $evalFunction as item()) as element()* {
