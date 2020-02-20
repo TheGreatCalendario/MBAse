@@ -55,15 +55,16 @@ declare variable $subState :=
 
 return $mbaHolton;  :)
 
-(: Check if non-updating version of refine state function works.  
+(: Check if non-updating version of refine state function works.   
 Using an MBA that is loaded from file system makes it easier to be sure it has no descendants. expected result: refined state node 
 let $subState := 
   <sc:state id="RunningGood">   
+    <sc:transition event="help" target="Restructuring"/>
   </sc:state>
 
 
 let $defaultBehavior := scc:isBehaviorConsistentSpecialization#2  
-return reflection:getRefinedState($originalState, $subState, $defaultBehavior)   :)
+return reflection:getRefinedState($originalState, $subState, $defaultBehavior)  :)
 
 (: Check if a final node can also be inserted using the refine state function. expected result: refined state node  
 let $finalState :=
@@ -236,42 +237,7 @@ let $inlineMBA := <mba xmlns="http://www.dke.jku.at/MBA" xmlns:sync="http://www.
 let $originalState :=  $inlineMBA//sc:state[@id='Restructuring']
 
 let $transition := $originalState//sc:transition[2]
-let $event := "event1.x"
-
-let $defaultBehavior := scc:isBehaviorConsistentSpecialization#2
-return reflection:getTransitionWithRefinendEvents($transition, $event, $defaultBehavior) :)
-
-(: Check if replacing event of transition with already existing event works. expected: error 
-let $inlineMBA := <mba xmlns="http://www.dke.jku.at/MBA" xmlns:sync="http://www.dke.jku.at/MBA/Synchronization" xmlns:sc="http://www.w3.org/2005/07/scxml" name="HoltonHotelChain" hierarchy="parallel" topLevel="business" isDefault="true">
-    <levels>
-      <level name="business"> 
-        <elements>
-          <sc:scxml name="Business">
-            <sc:datamodel>
-              <sc:data id="description">Worldwide hotel chain</sc:data>
-            </sc:datamodel>
-            <sc:initial>
-              <sc:transition target="Restructuring"/>
-            </sc:initial>
-            <sc:state id="Restructuring">
-              <sc:transition event="createAccomodationType">
-                <sync:newDescendant name="$_event/data/name" level="accomodationType"/>
-              </sc:transition>
-              <sc:transition event="event1" cond="existingCondition" target="Running"/>
-            </sc:state>
-            <sc:state id="Running">
-              <sc:transition event="restructure" target="Restructuring"/>
-            </sc:state>
-          </sc:scxml>
-        </elements>
-      </level>
-     </levels>
-    </mba>
-
-let $originalState :=  $inlineMBA//sc:state[@id='Restructuring']
-
-let $transition := $originalState//sc:transition[2]
-let $event := "event2"
+let $event := "subEvent"
 
 let $defaultBehavior := scc:isBehaviorConsistentSpecialization#2
 return reflection:getTransitionWithRefinendEvents($transition, $event, $defaultBehavior) :)
@@ -462,7 +428,7 @@ return reflection:getTransitionWithRefinedSource($transition, $source, $defaultB
 
 
 
-(: Check if adding an additional setter transitions works for consistency check. expected: positive result for check :)
+(: Check if adding an additional setter transitions works for consistency check. expected: positive result for check 
 let $inlineMBA := <mba xmlns="http://www.dke.jku.at/MBA" xmlns:sync="http://www.dke.jku.at/MBA/Synchronization" xmlns:sc="http://www.w3.org/2005/07/scxml" name="HoltonHotelChain" hierarchy="parallel" topLevel="business" isDefault="true">
     <levels>
       <level name="business"> 
@@ -518,6 +484,7 @@ let $inlineMBARefined := <mba xmlns="http://www.dke.jku.at/MBA" xmlns:sync="http
             <sc:state id="Running">
               <sc:transition event="restructure" target="Restructuring"/>
             </sc:state>
+           
           </sc:scxml>
         </elements>
       </level>
@@ -529,7 +496,7 @@ let $originalScxml := $inlineMBA//sc:scxml
 let $refinedScxml := $inlineMBARefined//sc:scxml
 
 let $result := scc:isBehaviorConsistentSpecialization($originalScxml, $refinedScxml)  
-return $result 
+return $result :)
 
 (: Check if adding a new transition between existing states in the original model works. expected: error  
 let $inlineMBA := <mba xmlns="http://www.dke.jku.at/MBA" xmlns:sync="http://www.dke.jku.at/MBA/Synchronization" xmlns:sc="http://www.w3.org/2005/07/scxml" name="HoltonHotelChain" hierarchy="parallel" topLevel="business" isDefault="true">

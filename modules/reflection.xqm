@@ -171,8 +171,13 @@ declare function reflection:getTransitionWithRefinendEvents($transition as eleme
         let $refinedScxml := copy $c := $originalScxml modify (
             let $stateCopy := $c//sc:state[@id = $transitionSourceState/@id/data()]
             let $transitionCopy := $stateCopy//sc:transition[$indexOfTransition]
+            let $eventCopy := $transitionCopy/@event
 
-            return replace node $transitionCopy with functx:add-or-update-attributes($transitionCopy, fn:QName('', 'event'), ($event))
+            return if (fn:empty($eventCopy)) then (
+                replace node $transitionCopy with functx:add-attributes($transitionCopy, fn:QName('', 'event'), $event)
+            ) else (
+                replace node $transitionCopy with functx:add-or-update-attributes($transitionCopy, fn:QName('', 'event'), ($eventCopy || "." || $event))
+            )
         ) return $c
 
         return if ($evalFunction($originalScxml, $refinedScxml)) then (
