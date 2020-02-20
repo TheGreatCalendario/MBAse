@@ -152,6 +152,19 @@ declare function scc:isEveryOriginalStateInRefined($originalStates as element()*
     return  $allStatesFromOriginalAreOk
 };
 
+(: checks if no duplicate state ids have been introduced in set of refinedStates :)
+declare function scc:isNoDuplicateStateIntroducedInRefined($refinedStates as element()*) as xs:boolean {
+   let $noDupliceStateIds :=  every $refinedState in $refinedStates satisfies (fn:count($refinedStates[@id=$refinedState/@id]) = 1)
+   return if ($noDupliceStateIds) then (
+    true()
+   ) else (
+       error(QName('http://www.dke.jku.at/MBA/err',
+               'UniqueIDConstraint'),
+               'State id must be unique')
+   )
+};
+
+
 
 declare function scc:areTransitionsConsistent($originalTransition as element(), $refinedTransition as element()) as xs:boolean {
 (:
@@ -211,5 +224,6 @@ declare function scc:isBehaviorConsistentSpecialization($originalScxml as elemen
     let $scxmlOriginalStates := scc:getAllStatesAndSubstates($originalScxml)
     let $scxmlRefinedStates := scc:getAllStatesAndSubstates($refinedScxml)
 
-    return (scc:isEveryOriginalStateInRefined($scxmlOriginalStates, $scxmlRefinedStates) and scc:isEveryOriginalTransitionInRefined($originalScxml, $refinedScxml))
+    return (scc:isEveryOriginalStateInRefined($scxmlOriginalStates, $scxmlRefinedStates) and scc:isNoDuplicateStateIntroducedInRefined($scxmlRefinedStates)
+            and scc:isEveryOriginalTransitionInRefined($originalScxml, $refinedScxml))
 };

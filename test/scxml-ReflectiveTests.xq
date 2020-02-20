@@ -55,16 +55,24 @@ declare variable $subState :=
 
 return $mbaHolton;  :)
 
-(: Check if non-updating version of refine state function works.   
-Using an MBA that is loaded from file system makes it easier to be sure it has no descendants. expected result: refined state node 
+(: Check if non-updating version of refine state function works.  
+Using an MBA that is loaded from file system isntead of repository makes it easier to be sure it has no descendants. expected result: refined state node  
 let $subState := 
-  <sc:state id="RunningGood">   
-    <sc:transition event="help" target="Restructuring"/>
-  </sc:state>
+  <sc:state id="RunningGood"/>   
 
 
 let $defaultBehavior := scc:isBehaviorConsistentSpecialization#2  
 return reflection:getRefinedState($originalState, $subState, $defaultBehavior)  :)
+
+(: Check if introducing a duplicate state id in refinement is detected..  expected result: error
+let $subState := 
+  <sc:state id="RunningGood">
+    <sc:state id="Restructuring"/>
+  </sc:state>   
+
+
+let $defaultBehavior := scc:isBehaviorConsistentSpecialization#2  
+return reflection:getRefinedState($originalState, $subState, $defaultBehavior)   :)
 
 (: Check if a final node can also be inserted using the refine state function. expected result: refined state node  
 let $finalState :=
@@ -498,7 +506,7 @@ let $refinedScxml := $inlineMBARefined//sc:scxml
 let $result := scc:isBehaviorConsistentSpecialization($originalScxml, $refinedScxml)  
 return $result :)
 
-(: Check if adding a new transition between existing states in the original model works. expected: error  
+(: Check if adding a new transition between existing states in the original model works. expected: error 
 let $inlineMBA := <mba xmlns="http://www.dke.jku.at/MBA" xmlns:sync="http://www.dke.jku.at/MBA/Synchronization" xmlns:sc="http://www.w3.org/2005/07/scxml" name="HoltonHotelChain" hierarchy="parallel" topLevel="business" isDefault="true">
     <levels>
       <level name="business"> 
@@ -561,4 +569,76 @@ let $refinedScxml := $inlineMBARefined//sc:scxml
 
 
 let $result := scc:isBehaviorConsistentSpecialization($originalScxml, $refinedScxml) 
+return $result  :)
+
+(: Check if creating a substate with duplicate id will create an error 
+let $inlineMBA := <mba xmlns="http://www.dke.jku.at/MBA" xmlns:sync="http://www.dke.jku.at/MBA/Synchronization" xmlns:sc="http://www.w3.org/2005/07/scxml" name="HoltonHotelChain" hierarchy="parallel" topLevel="business" isDefault="true">
+    <levels>
+      <level name="business"> 
+        <elements>
+          <sc:scxml name="Business">
+            <sc:datamodel>
+              <sc:data id="description">Worldwide hotel chain</sc:data>
+            </sc:datamodel>
+            <sc:initial>
+              <sc:transition target="Restructuring"/>
+            </sc:initial>
+            <sc:state id="Restructuring">
+              <sc:transition event="createAccomodationType">
+                <sync:newDescendant name="$_event/data/name" level="accomodationType"/>
+              </sc:transition>
+              <sc:transition event="event1" cond="existingCondition" target="Running"/>
+              <sc:state id="RefinedRestructuring"/>
+            </sc:state>
+            <sc:state id="Running">
+             <!--  <sc:transition event="restructure" target="Restructuring"/> -->
+            </sc:state>
+          </sc:scxml>
+        </elements>
+      </level>
+     </levels>
+    </mba>
+    
+let $inlineMBARefined := <mba xmlns="http://www.dke.jku.at/MBA" xmlns:sync="http://www.dke.jku.at/MBA/Synchronization" xmlns:sc="http://www.w3.org/2005/07/scxml" name="HoltonHotelChain" hierarchy="parallel" topLevel="business" isDefault="true">
+    <levels>
+      <level name="business"> 
+        <elements>
+          <sc:scxml name="Business">
+            <sc:datamodel>
+              <sc:data id="description">Worldwide hotel chain</sc:data>
+            </sc:datamodel>
+            <sc:initial>
+              <sc:transition target="Restructuring"/>
+            </sc:initial>
+            <sc:state id="Restructuring">
+              <sc:transition event="createAccomodationType">
+                <sync:newDescendant name="$_event/data/name" level="accomodationType"/>
+              </sc:transition>
+               <!--  additional setter transitions with no target or state/substate that refers to source-->
+              <sc:transition event="setterEvent1"/>  
+              <sc:transition event="setterEvent2" target="Restructuring"/>  
+              <sc:transition event="setterEvent3" target="RefinedRestructuring"/> 
+              <sc:transition event="event1.refined" cond="existingCondition" target="Running"/>
+              <sc:state id="RefinedRestructuring">
+                 <!--  additional transition that has state/substate as target and should work --> 
+               <sc:transition event="setterEvent4" target="RefinedRestructuring"/> 
+              </sc:state>
+            </sc:state>
+            <sc:state id="Running">
+              <sc:transition event="restructure" target="Restructuring"/>
+              <sc:state id="Restructuring"/>
+            </sc:state>
+          </sc:scxml>
+        </elements>
+      </level>
+     </levels>
+    </mba> 
+    
+
+    
+    
+let $originalScxml := $inlineMBA//sc:scxml
+let $refinedScxml := $inlineMBARefined//sc:scxml
+
+let $result := scc:isBehaviorConsistentSpecialization($originalScxml, $refinedScxml)  
 return $result :)
