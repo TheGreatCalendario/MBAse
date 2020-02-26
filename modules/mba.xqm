@@ -449,6 +449,12 @@ declare function mba:getCollection($db as xs:string,
     return $document
 };
 
+declare function mba:getCollection($mba as element()) {
+    let $db := db:name($mba)
+    let $collectionName := mba:getCollectionName($mba)
+    return mba:getCollection($db, $collectionName)
+};
+
 declare function mba:getTopLevelName($mba as element()) as xs:string {
     if ($mba/@hierarchy = 'simple') then
         $mba/mba:topLevel/@name
@@ -595,18 +601,19 @@ declare function mba:getDirectAncestors($mba as element()) as element()* {
 };
 
 declare function mba:getDescendantsAccumulator($mba as element()) as element()* {
-    if ($mba/@hierarchy = 'simple') then
-        $mba/descendant::mba:mba
-    else (
-        let $descendants := $mba/../mba:mba[./mba:ancestors/mba:mba/@ref = $mba/@name]
-        for $descendant in $descendants
-            return ($descendant, mba:getDescendants($descendant))
-    )
+    let $descendants := mba:getCollection($mba)//mba:mba[mba:ancestors/mba:mba/@ref = $mba/@name]
+    for $descendant in $descendants
+        return ($descendant, mba:getDescendantsAccumulator($descendant))
 };
 
 declare function mba:getDescendants($mba as element()) as element()* {
-    let $allDescendants := mba:getDescendantsAccumulator($mba)
-    return functx:distinct-deep($allDescendants)
+    if ($mba/@hierarchy = 'simple') then
+        $mba/descendant::mba:mba
+    else (
+        let $allDescendants := mba:getDescendantsAccumulator($mba)
+        return functx:distinct-deep($allDescendants)
+    )
+
 };
 
 declare function mba:getDirectDescendants($mba as element()) as element()* {
