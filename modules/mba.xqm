@@ -298,12 +298,8 @@ declare function mba:concretizeParallelAccumulator($parents as element()+, $name
             )
 
         let $ancestorRefs :=
-            if ($numberOfParents = 1) then (
-                <mba ref="{$parents/@name/data()}"/>
-            ) else (
-                <mba ref="{$parents[1]/@name/data()}"/>,
-                <mba ref="{$parents[2]/@name/data()}"/>
-            )
+            for $parent in $parents
+                return <mba ref="{$parent/@name/data()}"/>
 
         let $concretization :=
             <mba xmlns="http://www.dke.jku.at/MBA" xmlns:sync="http://www.dke.jku.at/MBA/Synchronization" xmlns:sc="http://www.w3.org/2005/07/scxml" name="{$name}" topLevel="{$topLevel}" hierarchy="parallel" isDefault="{$isDefault} ">
