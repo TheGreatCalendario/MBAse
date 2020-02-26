@@ -627,6 +627,10 @@ declare function mba:getDirectDescendants($mba as element()) as element()* {
 
 };
 
+declare function mba:reduce($acc as item(), $mba as element()) as element()* {
+  $acc($mba)
+};
+
 declare function mba:getDescendantsAtLevel($mba as element(), $level as xs:string) as element()* {
     if ($mba/@hierarchy = 'simple') then
         $mba/descendant::mba:mba[./mba:topLevel/@name = $level]
