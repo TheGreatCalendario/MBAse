@@ -198,16 +198,11 @@ declare updating function mba:createCollection($db as xs:string,
 
 
 declare function mba:concretize($parents as element()+, $name as xs:string, $topLevel as xs:string, $isDefault as xs:boolean) as element()* {
-
-    let $concretization :=
-        if ($parents[1]/@hierarchy = 'simple') then
-            mba:concretizeSimple($parents, $name, $topLevel, $isDefault)
-        else (
-            mba:concretizeParallel($parents, $name, $topLevel, $isDefault)
-
+   if ($parents[1]/@hierarchy = 'simple') then
+       mba:concretizeSimple($parents, $name, $topLevel, $isDefault)
+   else (
+       mba:concretizeParallel($parents, $name, $topLevel, $isDefault, ())
         )
-    return $concretization
-
 };
 
 declare function mba:concretizeSimple($parents as element()+, $name as xs:string, $topLevel as xs:string, $isDefault as xs:boolean) as element() {
