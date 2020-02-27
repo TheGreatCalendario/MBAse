@@ -60,15 +60,13 @@ declare function reflection:getRefinedState($state as element(), $subState as el
     )
 };
 
-declare updating function reflection:refineStateDefaultBehavior($state as element(), $subState as element()) {
+declare function reflection:refineStateDefaultBehavior($state as element(), $subState as element()) {
     let $defaultBehaviorFunction := scc:isBehaviorConsistentSpecialization#2
-    let $refinedState := reflection:getRefinedState($state, $subState, $defaultBehaviorFunction)
-    return replace node $state with $refinedState
+    return reflection:getRefinedState($state, $subState, $defaultBehaviorFunction)
 };
 
-declare updating function reflection:refineStateCustomBehavior($state as element(), $subState as element(), $evalFunction as item()) {
-    let $refinedState := reflection:getRefinedState($state, $subState, $evalFunction)
-    return replace node $state with $refinedState
+declare function reflection:refineStateCustomBehavior($state as element(), $subState as element(), $evalFunction as item()) {
+     reflection:getRefinedState($state, $subState, $evalFunction)
 };
 
 
@@ -103,15 +101,13 @@ declare function reflection:getParallelRegionExtension($state as element(), $par
     )
 };
 
-declare updating function reflection:addParallelStateDefaultBehavior($state as element(), $parallelState as element(), $optionalNodes as element()?) {
+declare function reflection:addParallelStateDefaultBehavior($state as element(), $parallelState as element(), $optionalNodes as element()?) {
     let $defaultBehaviorFunction := scc:isBehaviorConsistentSpecialization#2
-    let $parallelRegionNode := reflection:getParallelRegionExtension($state, $parallelState, $defaultBehaviorFunction, $optionalNodes)
-    return replace node $state with $parallelRegionNode
+    return reflection:getParallelRegionExtension($state, $parallelState, $defaultBehaviorFunction, $optionalNodes)
 };
 
-declare updating function reflection:addParallelStateCustomBehavior($state as element(), $parallelState as element(), $evalFunction as item(), $optionalNodes as element()?) {
-    let $parallelRegionNode := reflection:getParallelRegionExtension($state, $parallelState, $evalFunction, $optionalNodes)
-    return replace node $state with $parallelRegionNode
+declare function reflection:addParallelStateCustomBehavior($state as element(), $parallelState as element(), $evalFunction as item(), $optionalNodes as element()?) {
+   reflection:getParallelRegionExtension($state, $parallelState, $evalFunction, $optionalNodes)
 };
 
 declare function reflection:getTransitionWithRefinedPreCondition($transition as element(), $condition as xs:string, $evalFunction as item()) as element()* {
@@ -149,15 +145,13 @@ declare function reflection:getTransitionWithRefinedPreCondition($transition as 
     )
 };
 
-declare updating function reflection:refinePreConditionDefaultBehavior($transition as element(), $condition as xs:string) {
+declare function reflection:refinePreConditionDefaultBehavior($transition as element(), $condition as xs:string) {
     let $defaultBehaviorFunction := scc:isBehaviorConsistentSpecialization#2
-    let  $refinedTransition := reflection:getTransitionWithRefinedPreCondition($transition, $condition, $defaultBehaviorFunction)
-    return replace node $transition with $refinedTransition
+    return reflection:getTransitionWithRefinedPreCondition($transition, $condition, $defaultBehaviorFunction)
 };
 
-declare updating function reflection:refinePreConditionCustomBehavior($transition as element(), $condition as xs:string, $evalFunction as item()) {
-    let  $refinedTransition := reflection:getTransitionWithRefinedPreCondition($transition, $condition, $evalFunction)
-    return replace node $transition with $refinedTransition
+declare function reflection:refinePreConditionCustomBehavior($transition as element(), $condition as xs:string, $evalFunction as item()) {
+    reflection:getTransitionWithRefinedPreCondition($transition, $condition, $evalFunction)
 };
 
 declare function reflection:getTransitionWithRefinendEvents($transition as element(), $event as xs:string, $evalFunction as item()) as element()* {
@@ -194,15 +188,13 @@ declare function reflection:getTransitionWithRefinendEvents($transition as eleme
     )
 };
 
-declare updating function reflection:refineEventDefaultBehavior($transition as element(), $event as xs:string) {
+declare function reflection:refineEventDefaultBehavior($transition as element(), $event as xs:string) {
     let $defaultBehaviorFunction := scc:isBehaviorConsistentSpecialization#2
-    let  $refinedTransition := reflection:getTransitionWithRefinendEvents($transition, $event, $defaultBehaviorFunction)
-    return replace node $transition with $refinedTransition
+    return reflection:getTransitionWithRefinendEvents($transition, $event, $defaultBehaviorFunction)
 };
 
-declare updating function reflection:refineEventCustomBehavior($transition as element(), $event as xs:string, $evalFunction as item()) {
-    let  $refinedTransition := reflection:getTransitionWithRefinendEvents($transition, $event, $evalFunction)
-    return replace node $transition with $refinedTransition
+declare  function reflection:refineEventCustomBehavior($transition as element(), $event as xs:string, $evalFunction as item()) {
+    reflection:getTransitionWithRefinendEvents($transition, $event, $evalFunction)
 };
 
 declare function reflection:getTransitionWithRefinedTarget($transition as element(), $target as xs:string, $evalFunction as item()) as element()* {
@@ -235,18 +227,15 @@ declare function reflection:getTransitionWithRefinedTarget($transition as elemen
 
 };
 
-declare updating function reflection:refineTransitionTargetDefaultBehavior($transition as element(), $target as xs:string) {
+declare function reflection:refineTargetDefaultBehavior($transition as element(), $target as xs:string) {
     let $defaultBehaviorFunction := scc:isBehaviorConsistentSpecialization#2
-    let $refinedTransition := reflection:getTransitionWithRefinedTarget($transition, $target, $defaultBehaviorFunction)
-    return replace node $transition with $refinedTransition
+    return reflection:getTransitionWithRefinedTarget($transition, $target, $defaultBehaviorFunction)
 };
 
 
-declare updating function reflection:refineTargetCustomBehavior($transition as element(), $target as xs:string, $evalFunction as item()) {
-    let $refinedTransition := reflection:getTransitionWithRefinedTarget($transition, $target, $evalFunction)
-    return replace node $transition with $refinedTransition
+declare function reflection:refineTargetCustomBehavior($transition as element(), $target as xs:string, $evalFunction as item()) {
+    reflection:getTransitionWithRefinedTarget($transition, $target, $evalFunction)
 };
-
 
 declare function reflection:getTransitionWithRefinedSource($transition as element(), $source as xs:string, $evalFunction as item()) as element()* {
     let $mba := $transition/ancestor::mba:mba
@@ -279,14 +268,12 @@ declare function reflection:getTransitionWithRefinedSource($transition as elemen
     )
 };
 
-declare updating function reflection:refineSourceDefaultBehavior($transition as element(), $source as xs:string) {
+declare function reflection:refineSourceDefaultBehavior($transition as element(), $source as xs:string) {
     let $defaultBehaviorFunction := scc:isBehaviorConsistentSpecialization#2
-    let $refinedTransitionStateNode := reflection:getTransitionWithRefinedSource($transition, $source, $defaultBehaviorFunction)
-    return replace node sc:getSourceState($transition) with $refinedTransitionStateNode
+    return reflection:getTransitionWithRefinedSource($transition, $source, $defaultBehaviorFunction)
 };
 
 
-declare updating function reflection:refineSourceCustomBehavior($transition as element(), $target as xs:string,  $evalFunction as item()) {
-    let $refinedTransition := reflection:getTransitionWithRefinedSource($transition, $target, $evalFunction)
-    return replace node $transition with $refinedTransition
+declare function reflection:refineSourceCustomBehavior($transition as element(), $target as xs:string,  $evalFunction as item()) {
+    reflection:getTransitionWithRefinedSource($transition, $target, $evalFunction)
 };
