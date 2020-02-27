@@ -202,7 +202,7 @@ declare function mba:concretize($parents as element()+, $name as xs:string, $top
        mba:concretizeSimple($parents, $name, $topLevel, $isDefault)
    else (
        mba:concretizeParallel($parents, $name, $topLevel, $isDefault, ())
-        )
+   )
 };
 
 declare function mba:concretizeSimple($parents as element()+, $name as xs:string, $topLevel as xs:string, $isDefault as xs:boolean) as element() {
@@ -229,13 +229,8 @@ declare function mba:concretizeSimple($parents as element()+, $name as xs:string
     return $concretization
 };
 
-(:call concretizeParallel2(IsMBa, "CoreCompetenceDKE", "module") :)
 
-declare function mba:concretizeParallel($parents as element()+, $name as xs:string, $topLevel as xs:string, $isDefault as xs:boolean) as element()* {
-    mba:concretizeParallelAccumulator($parents, $name, $topLevel, $isDefault, ())
-};
-
-declare function mba:concretizeParallelAccumulator($parents as element()+, $name as xs:string, $topLevel as xs:string, $isDefault as xs:boolean, $objectsCreated as element()*) as element()* {
+declare function mba:concretizeParallelAccumulatorVerbose($parents as element()+, $name as xs:string, $topLevel as xs:string, $isDefault as xs:boolean, $objectsCreated as element()*) as element()* {
 (: 1. Find out if $level is a valid level in all $parents :)
     let $validLevel :=
         every $parent in $parents satisfies
@@ -266,7 +261,7 @@ declare function mba:concretizeParallelAccumulator($parents as element()+, $name
 
         (: make concretization :)
         let $parentLevel :=
-            if ($numberOfParents = 1 or mba:checkIfSCXMLIdenticalForMBAListAtLevel($parents[1], $parents, $topLevel)) then (
+            if ($numberOfParents = 1 or (every $parent in $parents satisfies (mba:checkIfSCXMLIdenticalForMBAListAtLevel($parent, $parents, $topLevel)))) then (
                 functx:remove-elements(
                         functx:first-node(
                                 mba:getLevel($parents[1], $topLevel)
@@ -284,7 +279,7 @@ declare function mba:concretizeParallelAccumulator($parents as element()+, $name
         (: return subLevels and check if they are identical in case of 2 parents :)
         let $subLevels :=
             for $x in $subLevelNames
-            return if ($numberOfParents = 1 or mba:checkIfSCXMLIdenticalForMBAListAtLevel($parents[1], $parents, $x)) then (
+            return if ($numberOfParents = 1 or (every $parent in $parents satisfies (mba:checkIfSCXMLIdenticalForMBAListAtLevel($parent, $parents, $x))))  then (
                 mba:getLevel($parents[1], $x)
             ) else (
                 error(QName('http://www.dke.jku.at/MBA/err',
@@ -337,7 +332,7 @@ declare function mba:concretizeParallelAccumulator($parents as element()+, $name
             if (not($topLevel  = $secondLevel) and fn:empty(mba:getDescendantsAtLevel($parent, $secondLevel)[@isDefault = true()])
                 and not(functx:is-value-in-sequence($topLevel, mba:getSecondLevel($secondLevelDescendantsThatWereSpecified)/@name/data()))) then (
             (: 2.2.1 there are no default descendants for second level -> they need to be created :)
-            mba:concretizeParallelAccumulator($parent, concat("default", $secondLevel, "Object"), $secondLevel, true(), $objectsCreated)
+            mba:concretizeParallelAccumulatorVerbose($parent, concat("default", $secondLevel, "Object"), $secondLevel, true(), $objectsCreated)
             ) else ()
 
     (: AND ->
@@ -355,7 +350,7 @@ declare function mba:concretizeParallelAccumulator($parents as element()+, $name
             ) else ()
 
     let $secondLevelDefaultDescendants := ($secondLevelDefaultDescendantsThatAlreadyExist, $secondLevelDefaultDescendantsThatAreGenerated, $secondLevelDescendantsThatWereSpecified)
-    return mba:concretizeParallelAccumulator($secondLevelDefaultDescendants, $name, $topLevel, $isDefault, ($objectsCreated, $secondLevelDefaultDescendantsThatAreGenerated))
+    return mba:concretizeParallelAccumulatorVerbose($secondLevelDefaultDescendants, $name, $topLevel, $isDefault, ($objectsCreated, $secondLevelDefaultDescendantsThatAreGenerated))
     )
     ) else (
     (: 1. raise eerror because $topLevel is not a valid level in all $parents :)
@@ -363,6 +358,116 @@ declare function mba:concretizeParallelAccumulator($parents as element()+, $name
             'ConcretizeParent'),
             concat('Level ', $topLevel, ' is not available in all parents'))
     )
+};
+
+declare function mba:concretizeParallel($parents as element()+, $name as xs:string, $topLevel as xs:string, $isDefault as xs:boolean, $objectsCreated as element()*) as element()* {
+    (: 1. Find out if $level is a valid level in all $parents :)
+    if (every $parent in $parents satisfies mba:hasLevel($parent, $topLevel)) then (
+        let $numberOfParents := fn:count($parents)
+        (: 2. Check if $topLevel is second level of $parents :)
+        let $parentSecondLevels :=
+            distinct-values(
+                    for $parent in $parents
+                        return mba:getSecondLevel($parent)/@name/data()
+        )
+        return if (every $parent in $parents satisfies functx:is-value-in-sequence($topLevel, mba:getSecondLevel($parent)/@name/data())) then (
+            (: 3. Check if number of parents is correct :)
+            if (every $parent in $parents satisfies $numberOfParents =  fn:count(mba:getLevel($parent, $topLevel)/mba:parentLevels/mba:level)) then (
+                (: make concretization :)
+                let $parentLevel :=
+                    if ($numberOfParents = 1 or (every $parent in $parents satisfies (mba:checkIfSCXMLIdenticalForMBAListAtLevel($parent, $parents, $topLevel)))) then (
+                        functx:remove-elements(
+                                functx:first-node(
+                                        mba:getLevel($parents[1], $topLevel)
+                                ), 'parentLevels')
+                    ) else (
+                        error(QName('http://www.dke.jku.at/MBA/err',
+                                'ConcretizeParent'),
+                                'SCXML of TopLevel cannot be merged automatically')
+
+                    )
+                let $levelNames := mba:getNonTopLevels($parents[1])/@name/data()
+                let $subLevelNames := functx:value-except($levelNames, $parentSecondLevels)
+
+                (: return subLevels and check if they are identical in case of 2 parents :)
+                let $subLevels :=
+                    for $x in $subLevelNames
+                        return if ($numberOfParents = 1 or (every $parent in $parents satisfies (mba:checkIfSCXMLIdenticalForMBAListAtLevel($parent, $parents, $x))))  then (
+                            mba:getLevel($parents[1], $x)
+                        ) else (
+                            error(QName('http://www.dke.jku.at/MBA/err',
+                                    'ConcretizeParent'),
+                                    concat('SCXML of level ', $x, ' cannot be merged automatically'))
+                        )
+                let $ancestorRefs :=
+                    for $parent in $parents
+                        return <mba ref="{$parent/@name/data()}"/>
+
+                let $concretization :=
+                    <mba xmlns="http://www.dke.jku.at/MBA" xmlns:sync="http://www.dke.jku.at/MBA/Synchronization" xmlns:sc="http://www.w3.org/2005/07/scxml" name="{$name}" topLevel="{$topLevel}" hierarchy="parallel" isDefault="{$isDefault} ">
+                        <levels>
+                            {$parentLevel}
+                            {$subLevels}
+                        </levels>
+                        <ancestors>
+                            {$ancestorRefs}
+                        </ancestors>
+                    </mba>
+
+                return ($concretization, $objectsCreated)
+            ) else (
+                (: 3. raise error because number of parents is not correct :)
+                error(QName('http://www.dke.jku.at/MBA/err',
+                        'ConcretizeParent'),
+                        'Missing parent.')
+            )
+        ) else (
+        (: 2. $topLevel is NOT second level of $parents ->
+            identify parents that have been specified and in fact are direct ancestors of mba that is about to be created :)
+        let $secondLevelDescendantsThatWereSpecified :=
+            for $parent in $parents
+                let $secondLevels := mba:getSecondLevel($parent)/@name/data()
+                for $secondLevel in $secondLevels
+                    return
+                        if ($topLevel = $secondLevel) then (
+                            $parent
+                        ) else()
+        (: AND ->
+            generate all second level default descendants that are necessary but do not exist :)
+        let $secondLevelDefaultDescendantsThatAreGenerated :=
+            for $parent in $parents
+                let $secondLevels := mba:getSecondLevel($parent)/@name/data()
+                for $secondLevel in $secondLevels
+                    return
+                        if (not($topLevel  = $secondLevel) and fn:empty(mba:getDescendantsAtLevel($parent, $secondLevel)[@isDefault = true()])
+                                and not(functx:is-value-in-sequence($topLevel, mba:getSecondLevel($secondLevelDescendantsThatWereSpecified)/@name/data()))) then (
+                        (: 2.2.1 there are no default descendants for second level -> they need to be created :)
+                        mba:concretizeParallel($parent, concat("default", $secondLevel, "Object"), $secondLevel, true(), $objectsCreated)
+                        ) else ()
+
+        (: AND ->
+            load all default descendants that are necessary and already exist (in db) :)
+        let $secondLevelDefaultDescendantsThatAlreadyExist :=
+            for $parent in $parents
+                let $secondLevels := mba:getSecondLevel($parent)/@name/data()
+                for $secondLevel in $secondLevels
+                    return
+                        if (not(fn:empty(mba:getDescendantsAtLevel($parent, $secondLevel)[@isDefault = true()]))) then (
+                            let $existingDescendant := mba:getDescendantsAtLevel($parent, $secondLevel)[@isDefault = true()]
+                            return if (($topLevel != $existingDescendant/@topLevel/data()) and not(functx:is-value-in-sequence($existingDescendant, $parents))) then (
+                                $existingDescendant
+                            ) else ()
+                        ) else ()
+
+        let $secondLevelDefaultDescendants := ($secondLevelDefaultDescendantsThatAlreadyExist, $secondLevelDefaultDescendantsThatAreGenerated, $secondLevelDescendantsThatWereSpecified)
+        return mba:concretizeParallel($secondLevelDefaultDescendants, $name, $topLevel, $isDefault, ($objectsCreated, $secondLevelDefaultDescendantsThatAreGenerated))
+        )
+        ) else (
+            (: 1. raise error because $topLevel is not a valid level in all $parents :)
+            error(QName('http://www.dke.jku.at/MBA/err',
+                    'ConcretizeParent'),
+                    concat('Level ', $topLevel, ' is not available in all parents'))
+        )
 };
 
 declare function mba:checkIfSCXMLIdentical($scxml1 as element(), $scxml2 as element()) as xs:boolean {
